@@ -3,10 +3,9 @@ const SIDEBAR = [
   { title: 'Getting Started', path: '/getting-started' },
   { title: 'Installation', path: '/installation' },
   {
-    title: 'Test Menu',
+    title: 'Database & Cache',
     children: [
-      { title: 'Test', path: '/guides/test' },
-      { title: 'Test', path: '/guides/test' }
+      { title: 'Overview', path: '/database-and-cache/overview' }
     ]
   }
 ];
