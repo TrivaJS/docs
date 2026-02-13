@@ -25,11 +25,11 @@ Complete installation instructions for Triva across different platforms and use 
 
 ### Supported Platforms
 
-- ✅ **Linux** (Ubuntu 20.04+, Debian 11+, CentOS 8+, Fedora 35+)
-- ✅ **macOS** (10.15 Catalina or higher)
-- ✅ **Windows** (10, 11, Windows Server 2019+)
-- ✅ **Docker** (Official images available)
-- ✅ **Cloud Platforms** (AWS, Google Cloud, Azure, Heroku, Vercel, etc.)
+- **Linux** (Ubuntu 20.04+, Debian 11+, CentOS 8+, Fedora 35+)
+- **macOS** (10.15 Catalina or higher)
+- **Windows** (10, 11, Windows Server 2019+)
+- **Docker** (Official images available)
+- **Cloud Platforms** (AWS, Google Cloud, Azure, Heroku, Vercel, etc.)
 
 ### Supported Node.js Versions
 
@@ -259,7 +259,7 @@ import { build, get, listen } from 'triva';
 
 console.log('Triva imported successfully!');
 
-await build({ 
+await build({
   env: 'test',
   cache: { type: 'memory' }
 });
@@ -535,7 +535,7 @@ functions:
 import serverless from 'serverless-http';
 import { build, get } from 'triva';
 
-await build({ 
+await build({
   env: 'production',
   cache: { type: 'memory' }
 });

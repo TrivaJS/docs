@@ -1,13 +1,94 @@
 // Sidebar structure
 const SIDEBAR = [
   { title: 'Getting Started', path: '/getting-started' },
-  { title: 'Installation', path: '/installation' },
+  { title: 'Installation', path: '/installation' },,
   {
-    title: 'Database & Cache',
+    title: 'v1.0.0',
     children: [
-      { title: 'Overview', path: '/database-and-cache/overview' }
+      {
+        title: 'API Reference',
+        children: [
+          { title: 'Core API', path: '/v1/api-reference/core-api' },
+          { title: 'Build', path: '/v1/api-reference/build' },
+          { title: 'Routing', path: '/v1/api-reference/routing' },
+          { title: 'Listen', path: '/v1/api-reference/listen' },
+          { title: 'Use', path: '/v1/api-reference/use' },
+          {
+            title: 'Request',
+            children: [
+              { title: 'Headers', path: '/v1/api-reference/request/headers' },
+              { title: 'Query', path: '/v1/api-reference/request/query' },
+              { title: 'Params', path: '/v1/api-reference/request/params' },
+              { title: 'JSON', path: '/v1/api-reference/request/json' },
+              { title: 'Text', path: '/v1/api-reference/request/text' },
+            ]
+          },
+          {
+            title: 'Response',
+            children: [
+              { title: 'Headers', path: '/v1/api-reference/response/headers' },
+              { title: 'Query', path: '/v1/api-reference/response/query' },
+              { title: 'Params', path: '/v1/api-reference/response/params' },
+              { title: 'JSON', path: '/v1/api-reference/response/json' },
+              { title: 'Text', path: '/v1/api-reference/response/text' },
+            ]
+          },
+          {
+            title: 'Cache',
+            children: [
+              { title: 'Set', path: '/v1/api-reference/cache/set' },
+              { title: 'Get', path: '/v1/api-reference/cache/get' },
+              { title: 'Keys', path: '/v1/api-reference/cache/keys' },
+              { title: 'Delete', path: '/v1/api-reference/cache/delete' },
+              { title: 'Clear', path: '/v1/api-reference/cache/clear' },
+            ]
+          },
+        ]
+      },
+      {
+        title: 'Database & Cache',
+        children: [
+          { title: 'Overview', path: '/v1/database-and-cache/overview' },
+          {
+            title: 'Adapters',
+            children: [
+              { title: 'Supported Adapters', path: '/v1/database-and-cache/adapters/supported-adapters' },
+              { title: 'Memory', path: '/v1/database-and-cache/adapters/memory' },
+              { title: 'Embedded', path: '/v1/database-and-cache/adapters/embedded' },
+              { title: 'MongoDB', path: '/v1/database-and-cache/adapters/mongodb' },
+              { title: 'Redis', path: '/v1/database-and-cache/adapters/redis' },
+              { title: 'PostgreSQL', path: '/v1/database-and-cache/adapters/postgresql' },
+              { title: 'SQLite', path: '/v1/database-and-cache/adapters/sqlite' },
+              { title: 'MySQL', path: '/v1/database-and-cache/adapters/mysql' },
+              { title: 'Supabase', path: '/v1/database-and-cache/adapters/supabase' },
+              { title: 'Better-SQLite3', path: '/v1/database-and-cache/adapters/better-sqlite3' }
+            ]
+          }
+        ]
+      },
+      {
+        title: 'Middleware',
+        children: [
+          { title: 'Overview', path: '/v1/middleware/overview' },
+          { title: 'Best Practices', path: '/v1/middleware/best-practices' },
+          { title: 'Middleware Stack', path: '/v1/middleware/middleware-stack' },
+          { title: 'Throttling', path: '/v1/middleware/throttling' },
+          { title: 'Logging', path: '/v1/middleware/logging' },
+          { title: 'Error Tracking', path: '/v1/middleware/error-tracking' },
+          { title: 'Cors', path: '/v1/middleware/cors' },
+          { title: 'Custom Middleware', path: '/v1/middleware/custom-middleware' },
+          { title: 'Auto Redirect', path: '/v1/middleware/auto-redirect' }
+        ]
+      },
+      {
+        title: 'Guides',
+        children: [
+          { title: 'Routing', path: '/v1/guides/routing' },
+          { title: 'Deployment', path: '/v1/guides/deployment' },
+        ]
+      },
     ]
-  }
+  },
 ];
 
 // Inline SVG arrow icon
@@ -24,12 +105,12 @@ const ARROW_SVG = `
 
 // Quick links/footer
 const QUICK_LINKS = [
-  { title: 'Terms of Use', path: '/terms' },
-  { title: 'Privacy Policy', path: '/privacy' },
-  { title: 'Security Policy', path: '/security' },
-  { title: 'Code of Conduct', path: '/code-of-conduct' },
-  { title: 'Funding', path: '/funding' },
-  { title: 'Contributing', path: '/contributing' }
+  { title: 'Terms of Use', path: '/policies/terms' },
+  { title: 'Privacy Policy', path: '/policies/privacy' },
+  { title: 'Security Policy', path: '/policies/security' },
+  { title: 'Code of Conduct', path: '/policies/code-of-conduct' },
+  { title: 'Funding', path: '/policies/funding' },
+  { title: 'Contributing', path: '/policies/contributing' }
 ];
 
 const COPYRIGHT = '© 2026 TrivaJS';

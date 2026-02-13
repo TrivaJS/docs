@@ -182,12 +182,38 @@ tr:nth-child(even) {
 }
 
 main a {
-  color: #dfdfdf;
+  color: #a8c7f7;
   text-decoration: none;
 }
 
 main a:hover {
-  color: #ffffff;
+  color: #6f8ebd;
+}
+
+main blockquote {
+  border-left: 4px solid #8957e5;
+  border-bottom: 1px solid #8957e5d3;
+  border-right: 1px solid #8957e5d3;
+  border-top: 1px solid #8957e5d3;
+  background-color: #6340a31a;
+  padding-left: 16px;
+  padding-right: 0;
+  padding-top: 4px;
+  padding-bottom: 4px;
+  color: #eaeaea;
+  margin: 20px 0;
+  border-top-left-radius: 5px;
+  border-top-right-radius: 5px;
+  border-bottom-left-radius: 5px;
+  border-bottom-right-radius: 5px;
+}
+
+main blockquote h3 {
+  text-transform: uppercase;
+}
+
+main blockquote p {
+  color: #eaeaeae1;
 }
 
 hr {

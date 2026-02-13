@@ -6,14 +6,14 @@ Welcome to Triva - an enterprise-grade Node.js HTTP/HTTPS framework designed for
 
 Triva is a modern, zero-dependency HTTP/HTTPS framework that provides:
 
-- 🚀 **High Performance** - Built on native Node.js with minimal overhead
-- 🎯 **Centralized Configuration** - Everything configured in one place
-- 🗄️ **Multiple Database Adapters** - Memory, SQLite, MongoDB, Redis, PostgreSQL, and more
-- 🛡️ **Advanced Security** - Built-in throttling, rate limiting, and auto-ban protection
-- 📊 **Comprehensive Logging** - Request tracking with User-Agent parsing
-- ⚡ **Built-in Caching** - Works seamlessly with any database adapter
-- 🔒 **HTTPS Support** - First-class SSL/TLS support
-- 🤖 **Smart Redirects** - Automatic routing for AI, bots, and crawlers
+- **High Performance** - Built on native Node.js with minimal overhead
+- **Centralized Configuration** - Everything configured in one place
+- **Multiple Database Adapters** - Memory, SQLite, MongoDB, Redis, PostgreSQL, and more
+- **Advanced Security** - Built-in throttling, rate limiting, and auto-ban protection
+- **Comprehensive Logging** - Request tracking with User-Agent parsing
+- **Built-in Caching** - Works seamlessly with any database adapter
+- **HTTPS Support** - First-class SSL/TLS support
+- **Smart Redirects** - Automatic routing for AI, bots, and crawlers
 
 ## Who Should Use Triva?
 
@@ -73,15 +73,15 @@ await build({
 
 // Define routes
 get('/', (req, res) => {
-  res.json({ 
+  res.json({
     message: 'Welcome to Triva!',
     timestamp: new Date().toISOString()
   });
 });
 
 get('/api/hello/:name', (req, res) => {
-  res.json({ 
-    greeting: `Hello, ${req.params.name}!` 
+  res.json({
+    greeting: `Hello, ${req.params.name}!`
   });
 });
 
@@ -167,7 +167,7 @@ curl http://localhost:3000/api/hello/World
 ```javascript
 import { build, get, post, put, del, listen } from 'triva';
 
-await build({ 
+await build({
   env: 'production',
   cache: { type: 'redis', host: 'localhost' },
   throttle: { limit: 100, window_ms: 60000 }
@@ -225,7 +225,7 @@ get('/api/data/:id', async (req, res) => {
   if (cached) {
     return res.json({ source: 'cache', data: cached });
   }
-  
+
   const fresh = await db.findById(req.params.id);
   res.json({ source: 'database', data: fresh });
 });
@@ -265,17 +265,17 @@ Triva uses centralized configuration in the `build()` function:
 await build({
   // Environment
   env: 'development' | 'production' | 'test',
-  
+
   // Protocol
   protocol: 'http' | 'https',
-  
+
   // SSL (for HTTPS)
   ssl: {
     key: Buffer | string,
     cert: Buffer | string,
     ca?: Buffer | string
   },
-  
+
   // Cache
   cache: {
     type: 'memory' | 'embedded' | 'sqlite' | 'mongodb' | 'redis' | 'postgresql' | 'supabase' | 'mysql',
@@ -284,7 +284,7 @@ await build({
       // Database-specific config
     }
   },
-  
+
   // Throttling
   throttle: {
     limit: number,           // Max requests per window
@@ -293,7 +293,7 @@ await build({
     ban_threshold: number,   // Violations before ban
     ban_ms: number          // Ban duration
   },
-  
+
   // Auto-Redirect
   redirects: {
     enabled: boolean,
@@ -305,12 +305,12 @@ await build({
     whitelist: string[],
     customRules: []
   },
-  
+
   // Middleware
   middleware: {
     // Custom middleware options
   },
-  
+
   // Error Tracking
   errorTracking: {
     enabled: boolean,
@@ -409,7 +409,7 @@ kill -9 <PID>
 
 **Problem:** `Cannot find module 'triva'`
 
-**Solution:** 
+**Solution:**
 1. Ensure you ran `npm install triva`
 2. Check `node_modules/` exists
 3. Try `npm install` again
