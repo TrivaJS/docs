@@ -87,6 +87,22 @@ const SIDEBAR = [
           { title: 'Deployment', path: '/v1/guides/deployment' },
         ]
       },
+      {
+        title: 'Extensions',
+        children: [
+          { title: 'Creating Extensions', path: '/v1/extensions/creating-extensions' },
+          { title: 'Publishing Extensions', path: '/v1/extensions/publishing-extensions' },
+          {
+            title: 'Official Extensions',
+            children: [
+              { title: 'CORS', path: '/v1/extensions/official/cors' },
+              { title: 'CLI', path: '/v1/extensions/official/cli' },
+              { title: 'Shortcuts', path: '/v1/extensions/official/shortcuts' },
+              { title: 'JWT', path: '/v1/extensions/official/jwt' },
+            ]
+          },
+        ]
+      },
     ]
   },
 ];
