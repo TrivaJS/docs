@@ -147,27 +147,27 @@ get('/api/:version/users/:id', (req, res) => {
 ```javascript
 get('/users/:id', (req, res) => {
   const id = parseInt(req.params.id);
-
+  
   // Validate numeric ID
   if (isNaN(id) || id < 1) {
-    return res.status(400).json({
-      error: 'Invalid user ID'
+    return res.status(400).json({ 
+      error: 'Invalid user ID' 
     });
   }
-
+  
   res.json({ userId: id });
 });
 
 // UUID validation
 get('/items/:uuid', (req, res) => {
   const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/;
-
+  
   if (!uuidRegex.test(req.params.uuid)) {
-    return res.status(400).json({
-      error: 'Invalid UUID format'
+    return res.status(400).json({ 
+      error: 'Invalid UUID format' 
     });
   }
-
+  
   res.json({ uuid: req.params.uuid });
 });
 ```
@@ -182,7 +182,7 @@ get('/items/:uuid', (req, res) => {
 // URL: /search?q=triva&page=2&limit=20
 get('/search', (req, res) => {
   const { q, page, limit } = req.query;
-
+  
   res.json({
     query: q,
     page: parseInt(page) || 1,
@@ -194,7 +194,7 @@ get('/search', (req, res) => {
 get('/products', (req, res) => {
   const category = req.query.category || 'all';
   const sort = req.query.sort || 'name';
-
+  
   res.json({ category, sort });
 });
 ```
@@ -204,10 +204,10 @@ get('/products', (req, res) => {
 ```javascript
 // URL: /filter?tags=javascript&tags=node&tags=triva
 get('/filter', (req, res) => {
-  const tags = Array.isArray(req.query.tags)
-    ? req.query.tags
+  const tags = Array.isArray(req.query.tags) 
+    ? req.query.tags 
     : [req.query.tags];
-
+  
   res.json({ tags });
 });
 ```
@@ -218,20 +218,20 @@ get('/filter', (req, res) => {
 get('/api/users', (req, res) => {
   const page = parseInt(req.query.page) || 1;
   const limit = parseInt(req.query.limit) || 10;
-
+  
   // Validate ranges
   if (page < 1 || page > 1000) {
-    return res.status(400).json({
-      error: 'Page must be between 1 and 1000'
+    return res.status(400).json({ 
+      error: 'Page must be between 1 and 1000' 
     });
   }
-
+  
   if (limit < 1 || limit > 100) {
-    return res.status(400).json({
-      error: 'Limit must be between 1 and 100'
+    return res.status(400).json({ 
+      error: 'Limit must be between 1 and 100' 
     });
   }
-
+  
   res.json({ page, limit });
 });
 ```
@@ -246,18 +246,18 @@ get('/api/users', (req, res) => {
 post('/api/users', async (req, res) => {
   try {
     const body = await req.json();
-
+    
     // Validate required fields
     if (!body.email || !body.password) {
-      return res.status(400).json({
-        error: 'Email and password required'
+      return res.status(400).json({ 
+        error: 'Email and password required' 
       });
     }
-
+    
     res.status(201).json({ user: body });
   } catch (error) {
-    res.status(400).json({
-      error: 'Invalid JSON'
+    res.status(400).json({ 
+      error: 'Invalid JSON' 
     });
   }
 });
@@ -268,8 +268,8 @@ post('/api/users', async (req, res) => {
 ```javascript
 post('/api/text', async (req, res) => {
   const text = await req.text();
-
-  res.json({
+  
+  res.json({ 
     length: text.length,
     preview: text.substring(0, 100)
   });
@@ -281,22 +281,22 @@ post('/api/text', async (req, res) => {
 ```javascript
 post('/api/products', async (req, res) => {
   const body = await req.json();
-
+  
   // Validate schema
   const errors = [];
-
+  
   if (!body.name || body.name.length < 3) {
     errors.push('Name must be at least 3 characters');
   }
-
+  
   if (!body.price || typeof body.price !== 'number' || body.price < 0) {
     errors.push('Price must be a positive number');
   }
-
+  
   if (errors.length > 0) {
     return res.status(400).json({ errors });
   }
-
+  
   res.status(201).json({ product: body });
 });
 ```
@@ -309,7 +309,7 @@ post('/api/products', async (req, res) => {
 
 ```javascript
 get('/api/data', (req, res) => {
-  res.json({
+  res.json({ 
     success: true,
     data: [1, 2, 3]
   });
@@ -317,8 +317,8 @@ get('/api/data', (req, res) => {
 
 // With status code
 post('/api/data', (req, res) => {
-  res.status(201).json({
-    created: true
+  res.status(201).json({ 
+    created: true 
   });
 });
 ```
@@ -478,11 +478,11 @@ get('/api/v2/users', v2UsersHandler);
 // Version in header
 get('/api/users', (req, res) => {
   const version = req.headers['api-version'] || 'v1';
-
+  
   if (version === 'v2') {
     return v2UsersHandler(req, res);
   }
-
+  
   v1UsersHandler(req, res);
 });
 ```
@@ -516,7 +516,7 @@ get('/api/products', (req, res) => {
   const page = parseInt(req.query.page) || 1;
   const limit = parseInt(req.query.limit) || 20;
   const offset = (page - 1) * limit;
-
+  
   res.json({
     data: [],
     pagination: {
@@ -534,13 +534,13 @@ get('/api/products', (req, res) => {
 
 ```javascript
 get('/api/users', (req, res) => {
-  const {
+  const { 
     role,          // Filter by role
     status,        // Filter by status
     sort = 'name', // Sort field
     order = 'asc'  // Sort order
   } = req.query;
-
+  
   res.json({
     filters: { role, status },
     sort: { field: sort, order }
@@ -595,13 +595,13 @@ get('/api/v2/users', v2Handler);
 ```javascript
 get('/api/users/:id', async (req, res) => {
   const user = await db.findUser(req.params.id);
-
+  
   if (!user) {
-    return res.status(404).json({
-      error: 'User not found'
+    return res.status(404).json({ 
+      error: 'User not found' 
     });
   }
-
+  
   res.json({ user });
 });
 ```
@@ -611,14 +611,14 @@ get('/api/users/:id', async (req, res) => {
 ```javascript
 post('/api/users', async (req, res) => {
   const body = await req.json();
-
+  
   // Validate before processing
   if (!body.email || !body.password) {
-    return res.status(400).json({
-      error: 'Email and password required'
+    return res.status(400).json({ 
+      error: 'Email and password required' 
     });
   }
-
+  
   // Process valid data
   res.status(201).json({ user: body });
 });
