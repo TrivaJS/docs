@@ -88,6 +88,45 @@ const SIDEBAR = [
         ]
       },
       {
+        title: 'Examples',
+        children: [
+          {
+            title: 'Basic',
+            children: [
+              { title: 'Hello World', path: '/v1/examples/basic/hello-world' },
+              { title: 'File Upload', path: '/v1/examples/basic/file-upload' },
+              { title: 'Authentication', path: '/v1/examples/basic/authentication' },
+              { title: 'Rest API', path: '/v1/examples/basic/rest-api' },
+            ]
+          },
+          {
+            title: 'Database',
+            children: [
+              { title: 'MongoDB', path: '/v1/examples/database/mongodb' },
+              { title: 'Redis', path: '/v1/examples/database/redis' },
+              { title: 'PostgreSQL', path: '/v1/examples/database/postgresql' },
+            ]
+          },
+          {
+            title: 'Real-World',
+            children: [
+              { title: 'Chat', path: '/v1/examples/real-world/chat' },
+              { title: 'Ecommerce', path: '/v1/examples/real-world/ecommerce' },
+              { title: 'Blog API', path: '/v1/examples/real-world/blog-api' },
+            ]
+          },
+          {
+            title: 'Advanced',
+            children: [
+              { title: 'GraphQL', path: '/v1/examples/advanced/graphql' },
+              { title: 'Microservices', path: '/v1/examples/advanced/microservices' },
+              { title: 'Rate Limiting', path: '/v1/examples/advanced/rate-limiting' },
+              { title: 'Websockets', path: '/v1/examples/advanced/websockets' },
+            ]
+          },
+        ]
+      },
+      {
         title: 'Extensions',
         children: [
           { title: 'Creating Extensions', path: '/v1/extensions/creating-extensions' },
