@@ -2,7 +2,7 @@
 body {
   margin: 0;
   font-family: system-ui, sans-serif;
-  background: #0e0e12;
+  background: #0a0a0a;
   color: #eaeaea;
 }
 
@@ -21,7 +21,8 @@ body {
   top: 0;
   left: 0;
   width: 260px;
-  background: #15151d;
+  background: #000000;
+  border-right: 1px solid #27272a;
   padding: 16px;
   display: flex;
   flex-direction: column;
@@ -81,12 +82,19 @@ body {
 }
 
 .sidebar a:hover {
-  color: #ffffff;
+  color: #3b82f6;
 }
 
 .sidebar a.active {
   font-weight: bold;
-  color: #ffffff;
+  color: #3b82f6;
+  background: linear-gradient(135deg,
+    rgba(59, 130, 246, 0.1),
+    rgba(139, 92, 246, 0.1)
+  );
+  border-left: 3px solid #3b82f6;
+  padding-left: 8px;
+  border-radius: 4px;
 }
 
 /* Section titles */
@@ -260,4 +268,25 @@ hr {
   color: #868686;
   background-color: #88888821;
   padding: 7.5px 0 7.5px 0;
+}
+
+/* Arrow animation (add at end of file) */
+.sidebar .arrow {
+  transition: transform 0.2s ease;
+  display: inline-block;
+}
+
+.sidebar li.expanded > .section-title .arrow {
+  transform: rotate(90deg);
+}
+
+/* Better visual feedback */
+.sidebar .section-title:hover {
+  color: #3b82f6;
+}
+
+/* Improved nested item styling */
+.sidebar .sub-items .sub-items {
+  margin-left: 8px;
+  padding-left: 12px;
 }

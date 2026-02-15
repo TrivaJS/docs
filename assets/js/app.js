@@ -1,7 +1,7 @@
 // Sidebar structure
 const SIDEBAR = [
   { title: 'Getting Started', path: '/getting-started' },
-  { title: 'Installation', path: '/installation' },,
+  { title: 'Installation', path: '/installation' },
   {
     title: 'v1.0.0',
     children: [
@@ -233,6 +233,13 @@ function applyHeaderIds() {
   });
 }
 
+// Recursive function to check if any nested child has the active path
+function hasActiveChild(item, currentPath) {
+  if (item.path === currentPath) return true;
+  if (!item.children) return false;
+  return item.children.some(child => hasActiveChild(child, currentPath));
+}
+
 // Build sidebar recursively
 function buildSidebar(items, currentPath) {
   const ul = document.createElement('ul');
@@ -255,13 +262,8 @@ function buildSidebar(items, currentPath) {
       childUL.className = 'sub-items';
       li.appendChild(childUL);
 
-      if (
-        item.children.some(
-          c =>
-            c.path === currentPath ||
-            (c.children && c.children.some(sc => sc.path === currentPath))
-        )
-      ) {
+      // Use recursive function to check all nested levels
+      if (hasActiveChild(item, currentPath)) {
         li.classList.add('expanded');
       }
     } else {
