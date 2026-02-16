@@ -9,118 +9,52 @@
             "path": "/installation"
         },
         {
-            "title": "API Reference",
+            "title": "Quick Start",
             "children": [
                 {
-                    "title": "Core API",
-                    "path": "/api-reference/core-api"
+                  "title": "First Server",
+                  "path": "/quick-start/first-server"
                 },
                 {
-                    "title": "Build",
-                    "path": "/api-reference/build"
-                },
-                {
-                    "title": "Routing",
-                    "path": "/api-reference/routing"
-                },
-                {
-                    "title": "Listen",
-                    "path": "/api-reference/listen"
-                },
-                {
-                    "title": "Use",
-                    "path": "/api-reference/use"
-                },
-                {
-                    "title": "Request",
-                    "children": [
-                        { "title": "Headers", "path": "/api-reference/request/headers" },
-                        { "title": "Query", "path": "/api-reference/request/query" },
-                        { "title": "Params", "path": "/api-reference/request/params" },
-                        { "title": "JSON", "path": "/api-reference/request/json" },
-                        { "title": "Text", "path": "/api-reference/request/text" }
-                    ]
-                },
-                {
-                    "title": "Response",
-                    "children": [
-                        { "title": "Headers", "path": "/api-reference/response/headers" },
-                        { "title": "Query", "path": "/api-reference/response/query" },
-                        { "title": "Params", "path": "/api-reference/response/params" },
-                        { "title": "JSON", "path": "/api-reference/response/json" },
-                        { "title": "Text", "path": "/api-reference/response/text" }
-                    ]
-                },
-                {
-                    "title": "Cache",
-                    "children": [
-                        { "title": "Set", "path": "/api-reference/cache/set" },
-                        { "title": "Get", "path": "/api-reference/cache/get" },
-                        { "title": "Keys", "path": "/api-reference/cache/keys" },
-                        { "title": "Delete", "path": "/api-reference/cache/delete" },
-                        { "title": "Clear", "path": "/api-reference/cache/clear" }
-                    ]
+                  "title": "Examples",
+                  "path": "/quick-start/examples"
                 }
             ]
         },
         {
-            "title": "Database & Cache",
+            "title": "Core",
             "children": [
                 {
-                    "title": "Overview",
-                    "path": "/database-and-cache/overview"
+                  "title": "API References",
+                  "path": "/core/api"
                 },
                 {
-                    "title": "Adapters",
-                    "children": [
-                        { "title": "Supported Adapters", "path": "/database-and-cache/adapters/supported-adapters" },
-                        { "title": "Memory", "path": "/database-and-cache/adapters/memory" },
-                        { "title": "Embedded", "path": "/database-and-cache/adapters/embedded" },
-                        { "title": "MongoDB", "path": "/database-and-cache/adapters/mongodb" },
-                        { "title": "Redis", "path": "/database-and-cache/adapters/redis" },
-                        { "title": "PostgreSQL", "path": "/database-and-cache/adapters/postgresql" },
-                        { "title": "SQLite", "path": "/database-and-cache/adapters/sqlite" },
-                        { "title": "MySQL", "path": "/database-and-cache/adapters/mysql" },
-                        { "title": "Supabase", "path": "/database-and-cache/adapters/supabase" },
-                        { "title": "Better-SQLite3", "path": "/database-and-cache/adapters/better-sqlite3" }
-                    ]
-                }
-            ]
-        },
-        {
-            "title": "Middleware",
-            "children": [
-                { "title": "Overview", "path": "/middleware/overview" },
-                { "title": "Best Practices", "path": "/middleware/best-practices" },
-                { "title": "Middleware Stack", "path": "/middleware/middleware-stack" },
-                { "title": "Throttling", "path": "/middleware/throttling" },
-                { "title": "Logging", "path": "/middleware/logging" },
-                { "title": "Error Tracking", "path": "/middleware/error-tracking" },
-                { "title": "Cors", "path": "/middleware/cors" },
-                { "title": "Custom Middleware", "path": "/middleware/custom-middleware" },
-                { "title": "Auto Redirect", "path": "/middleware/auto-redirect" }
-            ]
-        },
-        {
-            "title": "Guides",
-            "children": [
-                { "title": "Routing", "path": "/guides/routing" },
-                { "title": "Deployment", "path": "/guides/deployment" }
-            ]
-        },
-        {
-            "title": "Extensions",
-            "children": [
-                { "title": "Creating Extensions", "path": "/extensions/creating-extensions" },
-                { "title": "Publishing Extensions", "path": "/extensions/publishing-extensions" },
+                  "title": "Configuration",
+                  "path": "/core/configuration"
+                },
                 {
-                    "title": "Official Extensions",
-                    "children": [
-                        { "title": "CORS", "path": "/extensions/official/cors" },
-                        { "title": "CLI", "path": "/extensions/official/cli" },
-                        { "title": "Shortcuts", "path": "/extensions/official/shortcuts" },
-                        { "title": "JWT", "path": "/extensions/official/jwt" }
-                    ]
+                  "title": "Request",
+                  "path": "/core/request"
+                },
+                {
+                  "title": "Response",
+                  "path": "/core/response"
+                },
+                {
+                  "title": "Routing",
+                  "path": "/core/routing"
+                },
+                {
+                  "title": "Middleware",
+                  "path": "/core/middleware"
+                },
+                {
+                  "title": "Error Handling",
+                  "path": "/core/error-handling"
+                },
+                {
+                  "title": "Concepts",
+                  "path": "/core/concepts"
                 }
             ]
         }
