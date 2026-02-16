@@ -1,0 +1,11 @@
+{
+  "quickLinks": [
+    { "title": "Terms of Use", "path": "/policies/terms" },
+    { "title": "Privacy Policy", "path": "/policies/privacy" },
+    { "title": "Security Policy", "path": "/policies/security" },
+    { "title": "Code of Conduct", "path": "/policies/code-of-conduct" },
+    { "title": "Funding", "path": "/policies/funding" },
+    { "title": "Contributing", "path": "/policies/contributing" }
+  ],
+  "copyright": "© 2026 TrivaJS"
+}
