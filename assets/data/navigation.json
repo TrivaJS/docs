@@ -9,6 +9,14 @@
             "path": "/installation"
         },
         {
+            "title": "Changes",
+            "path": "/changes"
+        },
+        {
+            "title": "RoadMap",
+            "path": "/roadmap"
+        },
+        {
             "title": "Quick Start",
             "children": [
                 {
@@ -55,6 +63,92 @@
                 {
                   "title": "Concepts",
                   "path": "/core/concepts"
+                }
+            ]
+        },
+        {
+            "title": "Middleware",
+            "children": [
+                {
+                  "title": "Overview",
+                  "path": "/middleware/overview"
+                },
+                {
+                  "title": "Throttling",
+                  "path": "/middleware/throttling"
+                },
+                {
+                  "title": "Logging",
+                  "path": "/middleware/logging"
+                },
+                {
+                  "title": "Cors",
+                  "path": "/middleware/cors"
+                },
+                {
+                  "title": "Error Tracking",
+                  "path": "/middleware/error-tracking"
+                },
+                {
+                  "title": "Custom",
+                  "path": "/middleware/custom"
+                },
+                {
+                  "title": "Order",
+                  "path": "/middleware/order"
+                }
+            ]
+        },
+        {
+            "title": "Database & Cache",
+            "children": [
+                {
+                  "title": "Overview",
+                  "path": "/database/overview"
+                },
+                {
+                  "title": "Quick Start",
+                  "path": "/database/quick-start"
+                },
+                {
+                  "title": "Adapters",
+                  "path": "/database/adapters"
+                },
+                {
+                  "title": "MongoDB",
+                  "path": "/database/mongodb"
+                },
+                {
+                  "title": "PostgreSQL",
+                  "path": "/database/postgresql"
+                },
+                {
+                  "title": "MySQL",
+                  "path": "/database/mysql"
+                },
+                {
+                  "title": "Redis",
+                  "path": "/database/redis"
+                },
+                {
+                  "title": "SQLite",
+                  "path": "/database/sqlite"
+                },
+                {
+                  "title": "Better-SQLite3",
+                  "path": "/database/better-sqlite3"
+                },
+                {
+                  "title": "Supabase",
+                  "path": "/database/supabase"
+                },
+                {
+                  "title": "Embedded",
+                  "path": "/database/embedded"
+                },
+                {
+                  "title": "Memory",
+                  "path": "/database/memory"
                 }
             ]
         }

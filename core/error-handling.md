@@ -3,7 +3,11 @@
 ## Try/Catch Pattern
 
 ```javascript
-app.get('/api/user/:id', (req, res) => {
+import { build, get, listen } from 'triva';
+
+await build({ env: 'development' });
+
+get('/api/user/:id', (req, res) => {
   try {
     const user = getUserById(req.params.id);
     res.json(user);
@@ -11,26 +15,45 @@ app.get('/api/user/:id', (req, res) => {
     res.status(500).json({ error: err.message });
   }
 });
+
+listen(3000);
 ```
 
 ## Async Error Handling
 
 ```javascript
-app.get('/api/posts', async (req, res) => {
-  try {
-    const posts = await database.find('posts', {});
-    res.json(posts);
-  } catch (err) {
-    console.error('Database error:', err);
-    res.status(500).json({ error: 'Database error' });
+import { build, get, cache, listen } from 'triva';
+
+await build({
+  env: 'development',
+  cache: {
+    type: 'mongodb',
+    url: 'mongodb://localhost:27017/myapp'
   }
 });
+
+get('/api/posts', async (req, res) => {
+  try {
+    // Cache is configured with MongoDB adapter
+    const posts = await cache.get('posts');
+    res.json(posts);
+  } catch (err) {
+    console.error('Cache error:', err);
+    res.status(500).json({ error: 'Cache error' });
+  }
+});
+
+listen(3000);
 ```
 
 ## Error Middleware
 
 ```javascript
-app.use((req, res, next) => {
+import { build, use, listen } from 'triva';
+
+await build({ env: 'development' });
+
+use((req, res, next) => {
   try {
     // Your code
     next();
@@ -38,12 +61,18 @@ app.use((req, res, next) => {
     res.status(500).json({ error: err.message });
   }
 });
+
+listen(3000);
 ```
 
 ## Validation Errors
 
 ```javascript
-app.post('/api/users', (req, res) => {
+import { build, post, listen } from 'triva';
+
+await build({ env: 'development' });
+
+post('/api/users', (req, res) => {
   const { email, password } = req.body;
   
   if (!email) {
@@ -57,39 +86,64 @@ app.post('/api/users', (req, res) => {
   // Create user...
   res.status(201).json({ email });
 });
+
+listen(3000);
 ```
 
 ## Not Found Handler
 
 ```javascript
-// Define routes first
-app.get('/', (req, res) => res.send('Home'));
+import { build, get, listen } from 'triva';
 
-// Catch-all at the end
-app.all('*', (req, res) => {
+await build({ env: 'development' });
+
+// Define your routes
+get('/', (req, res) => res.send('Home'));
+get('/about', (req, res) => res.send('About'));
+
+// Wildcard route at the end for 404s
+get('*', (req, res) => {
   res.status(404).json({ error: 'Not Found' });
 });
+
+listen(3000);
 ```
 
-## Database Errors
+## Cache Errors
 
 ```javascript
-app.get('/api/data', async (req, res) => {
+import { build, get, cache, listen } from 'triva';
+
+await build({
+  env: 'development',
+  cache: {
+    type: 'redis',
+    url: 'redis://localhost:6379'
+  }
+});
+
+get('/api/data', async (req, res) => {
   try {
-    const data = await app.database.find('collection', {});
+    const data = await cache.get('collection');
     res.json(data);
   } catch (err) {
     if (err.code === 'CONNECTION_ERROR') {
-      return res.status(503).json({ error: 'Database unavailable' });
+      return res.status(503).json({ error: 'Cache unavailable' });
     }
     res.status(500).json({ error: 'Internal error' });
   }
 });
+
+listen(3000);
 ```
 
 ## Custom Error Class
 
 ```javascript
+import { build, get, listen } from 'triva';
+
+await build({ env: 'development' });
+
 class AppError extends Error {
   constructor(message, statusCode) {
     super(message);
@@ -97,7 +151,7 @@ class AppError extends Error {
   }
 }
 
-app.get('/api/resource/:id', (req, res) => {
+get('/api/resource/:id', (req, res) => {
   try {
     const resource = findResource(req.params.id);
     if (!resource) {
@@ -111,12 +165,18 @@ app.get('/api/resource/:id', (req, res) => {
     res.status(500).json({ error: 'Internal error' });
   }
 });
+
+listen(3000);
 ```
 
 ## Logging Errors
 
 ```javascript
-app.get('/api/data', async (req, res) => {
+import { build, get, listen } from 'triva';
+
+await build({ env: 'development' });
+
+get('/api/data', async (req, res) => {
   try {
     const data = await fetchData();
     res.json(data);
@@ -130,6 +190,8 @@ app.get('/api/data', async (req, res) => {
     res.status(500).json({ error: 'Internal error' });
   }
 });
+
+listen(3000);
 ```
 
 ## Next Steps

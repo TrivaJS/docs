@@ -11,21 +11,23 @@ npm install triva
 ## Your First Server
 
 ```javascript
-const Triva = require('triva');
-const app = new Triva();
+import { build, get, listen } from 'triva';
 
-app.get('/', (req, res) => {
+await build({
+  env: 'development'
+});
+
+get('/', (req, res) => {
   res.json({ message: 'Hello World' });
 });
 
-app.listen(3000);
-console.log('Server running on http://localhost:3000');
+listen(3000);
 ```
 
 ## What's Included
 
 - HTTP/HTTPS server
-- Built-in routing
+- Built-in routing: `get`, `post`, `put`, `del`, `patch`
 - Middleware support (throttling, logging, error tracking)
 - Database adapters (MongoDB, PostgreSQL, Redis, MySQL, SQLite, and more)
 - Cache layer

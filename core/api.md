@@ -1,73 +1,278 @@
 # API Reference
 
-## Application
+Complete list of Triva's core API.
 
-### new Triva(options)
+## Configuration
 
-```javascript
-const app = new Triva({ logging: { enabled: true } });
-```
+### build(options)
 
-### app.listen(port, callback)
+Configure and initialize the server.
 
 ```javascript
-app.listen(3000);
+import { build } from 'triva';
+
+await build({
+  env: 'development',
+  logging: { enabled: true },
+  cache: { type: 'memory' }
+});
 ```
 
-### app.use(middleware)
+[Configuration Details](https://docs.trivajs.com/core/configuration)
+
+### listen(port, callback)
+
+Start the HTTP server.
 
 ```javascript
-app.use((req, res, next) => next());
+import { listen } from 'triva';
+
+listen(3000, () => {
+  console.log('Server running');
+});
 ```
 
-## Routes
+### use(middleware)
 
-### app.get(path, ...handlers)
-### app.post(path, ...handlers)
-### app.put(path, ...handlers)
-### app.delete(path, ...handlers)
-### app.patch(path, ...handlers)
-### app.all(path, ...handlers)
+Add middleware to the application.
 
 ```javascript
-app.get('/users', (req, res) => res.json([]));
-app.post('/users', (req, res) => res.json(req.body));
+import { use } from 'triva';
+
+use((req, res, next) => {
+  console.log('Request received');
+  next();
+});
 ```
 
-## Request
+[Middleware Guide](https://docs.trivajs.com/core/middleware)
 
-- `req.method` - HTTP method
-- `req.url` - URL path
-- `req.headers` - Headers object
-- `req.query` - Query parameters
-- `req.params` - Route parameters
-- `req.body` - Parsed body
+## Route Methods
 
-[Request Details](https://docs.trivajs.com/core/request)
+### get(path, handler)
 
-## Response
+Handle GET requests.
 
-- `res.json(data)` - Send JSON
-- `res.send(text)` - Send text
-- `res.status(code)` - Set status
-- `res.redirect(url)` - Redirect
-- `res.setHeader(name, value)` - Set header
+```javascript
+import { get } from 'triva';
 
-[Response Details](https://docs.trivajs.com/core/response)
+get('/users', (req, res) => {
+  res.json({ users: [] });
+});
+```
 
-## Cache
+### post(path, handler)
 
-- `app.cache.set(key, value, ttl)`
-- `app.cache.get(key)`
-- `app.cache.delete(key)`
-- `app.cache.clear()`
-- `app.cache.keys(pattern)`
+Handle POST requests.
 
-## Database
+```javascript
+import { post } from 'triva';
 
-- `app.database.insert(collection, data)`
-- `app.database.find(collection, query)`
-- `app.database.update(collection, query, data)`
-- `app.database.delete(collection, query)`
+post('/users', (req, res) => {
+  res.json({ created: req.body });
+});
+```
+
+### put(path, handler)
+
+Handle PUT requests.
+
+```javascript
+import { put } from 'triva';
+
+put('/users/:id', (req, res) => {
+  res.json({ updated: req.params.id });
+});
+```
+
+### del(path, handler)
+
+Handle DELETE requests.
+
+```javascript
+import { del } from 'triva';
+
+del('/users/:id', (req, res) => {
+  res.json({ deleted: req.params.id });
+});
+```
+
+### patch(path, handler)
+
+Handle PATCH requests.
+
+```javascript
+import { patch } from 'triva';
+
+patch('/users/:id', (req, res) => {
+  res.json({ patched: req.params.id });
+});
+```
+
+[Routing Guide](https://docs.trivajs.com/core/routing)
+
+## Request Object
+
+### req.method
+
+HTTP method (GET, POST, etc.)
+
+### req.url
+
+Request URL path
+
+### req.headers
+
+Request headers object
+
+### req.query
+
+Query string parameters
+
+```javascript
+// /search?q=test&limit=10
+req.query.q      // 'test'
+req.query.limit  // '10'
+```
+
+### req.params
+
+Route parameters
+
+```javascript
+// Route: /users/:id
+// Request: /users/123
+req.params.id  // '123'
+```
+
+### req.body
+
+Parsed request body (JSON or text)
+
+```javascript
+// POST with JSON body
+req.body.username  // Access properties
+```
+
+[Request Reference](https://docs.trivajs.com/core/request)
+
+## Response Object
+
+### res.json(data)
+
+Send JSON response.
+
+```javascript
+res.json({ status: 'ok', data: [] });
+```
+
+### res.send(text)
+
+Send text response.
+
+```javascript
+res.send('Hello World');
+```
+
+### res.status(code)
+
+Set HTTP status code.
+
+```javascript
+res.status(404).json({ error: 'Not found' });
+```
+
+### res.redirect(url)
+
+Redirect to another URL.
+
+```javascript
+res.redirect('/login');
+```
+
+### res.header(name, value)
+
+Set response header.
+
+```javascript
+res.header('Content-Type', 'application/json');
+```
+
+[Response Reference](https://docs.trivajs.com/core/response)
+
+## Cache Object
+
+### cache.set(key, value, ttl)
+
+Store value in cache.
+
+```javascript
+import { cache } from 'triva';
+
+await cache.set('user:123', userData, 3600);
+```
+
+### cache.get(key)
+
+Retrieve value from cache.
+
+```javascript
+const data = await cache.get('user:123');
+```
+
+### cache.delete(key)
+
+Remove value from cache.
+
+```javascript
+await cache.delete('user:123');
+```
+
+### cache.clear()
+
+Clear all cache entries.
+
+```javascript
+await cache.clear();
+```
+
+### cache.stats()
+
+Get cache statistics.
+
+```javascript
+const stats = await cache.stats();
+```
+
+## Database Configuration
+
+Database is configured in `build()`, not accessed directly:
+
+```javascript
+await build({
+  cache: {
+    type: 'redis',
+    url: 'redis://localhost:6379'
+  }
+});
+```
+
+Supported adapters:
+- memory
+- redis
+- mongodb
+- postgresql
+- mysql
+- sqlite
+- better-sqlite3
+- supabase
+- embedded
 
 [Database Guide](https://docs.trivajs.com/database/overview)
+
+## Next Steps
+
+- [Routing Details](https://docs.trivajs.com/core/routing)
+- [Request Object](https://docs.trivajs.com/core/request)
+- [Response Object](https://docs.trivajs.com/core/response)
+- [Configuration Options](https://docs.trivajs.com/core/configuration)

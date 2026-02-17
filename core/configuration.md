@@ -1,27 +1,38 @@
 # Configuration
 
-Configure Triva via the options object.
+Configure Triva via the `build()` function options.
 
 ## Basic Configuration
 
 ```javascript
-const Triva = require('triva');
+import { build, listen } from 'triva';
 
-const app = new Triva({
+await build({
+  env: 'development',
   logging: {
     enabled: true,
     level: 'info'
   },
   cache: {
-    adapter: 'memory'
+    type: 'memory'
   }
+});
+
+listen(3000);
+```
+
+## Environment
+
+```javascript
+await build({
+  env: 'development'  // 'development' or 'production'
 });
 ```
 
 ## Logging Options
 
 ```javascript
-const app = new Triva({
+await build({
   logging: {
     enabled: true,
     level: 'info'  // 'debug', 'info', 'warn', 'error'
@@ -32,7 +43,7 @@ const app = new Triva({
 ## Throttling Options
 
 ```javascript
-const app = new Triva({
+await build({
   throttle: {
     enabled: true,
     max: 100,           // Max requests
@@ -44,12 +55,11 @@ const app = new Triva({
 ## Cache Options
 
 ```javascript
-const app = new Triva({
+await build({
   cache: {
-    adapter: 'memory',  // 'memory', 'redis'
-    ttl: 3600,          // Default TTL (seconds)
-    host: 'localhost',  // Redis host
-    port: 6379          // Redis port
+    type: 'memory',      // 'memory' or 'redis'
+    retention: 3600,     // Default TTL (seconds)
+    url: 'redis://localhost:6379'  // For Redis
   }
 });
 ```
@@ -57,7 +67,7 @@ const app = new Triva({
 ## Database Options
 
 ```javascript
-const app = new Triva({
+await build({
   database: {
     adapter: 'mongodb',
     url: 'mongodb://localhost:27017/mydb',
@@ -71,16 +81,19 @@ const app = new Triva({
 ## HTTPS Options
 
 ```javascript
-const fs = require('fs');
+import { build, listen } from 'triva';
+import { readFileSync } from 'fs';
 
-const app = new Triva({
+await build({
   https: {
     enabled: true,
-    key: fs.readFileSync('./ssl/key.pem'),
-    cert: fs.readFileSync('./ssl/cert.pem')
+    key: readFileSync('./ssl/key.pem'),
+    cert: readFileSync('./ssl/cert.pem')
   },
   autoRedirect: true  // HTTP → HTTPS
 });
+
+listen(443);
 ```
 
 [HTTPS Guide](https://docs.trivajs.com/deployment/https)
@@ -88,7 +101,10 @@ const app = new Triva({
 ## Environment Variables
 
 ```javascript
-const app = new Triva({
+import { build, listen } from 'triva';
+
+await build({
+  env: process.env.NODE_ENV || 'development',
   logging: {
     enabled: process.env.NODE_ENV === 'production',
     level: process.env.LOG_LEVEL || 'info'
@@ -98,15 +114,20 @@ const app = new Triva({
     url: process.env.DATABASE_URL
   }
 });
+
+listen(process.env.PORT || 3000);
 ```
 
 ## Full Example
 
 ```javascript
-const Triva = require('triva');
-const fs = require('fs');
+import { build, listen } from 'triva';
+import { readFileSync } from 'fs';
 
-const app = new Triva({
+await build({
+  // Environment
+  env: 'production',
+  
   // Logging
   logging: {
     enabled: true,
@@ -122,10 +143,9 @@ const app = new Triva({
   
   // Cache
   cache: {
-    adapter: 'redis',
-    host: 'localhost',
-    port: 6379,
-    ttl: 3600
+    type: 'redis',
+    url: 'redis://localhost:6379',
+    retention: 3600
   },
   
   // Database
@@ -137,8 +157,8 @@ const app = new Triva({
   // HTTPS
   https: {
     enabled: true,
-    key: fs.readFileSync('./ssl/key.pem'),
-    cert: fs.readFileSync('./ssl/cert.pem')
+    key: readFileSync('./ssl/key.pem'),
+    cert: readFileSync('./ssl/cert.pem')
   },
   autoRedirect: true,
   
@@ -146,7 +166,7 @@ const app = new Triva({
   errorTracking: true
 });
 
-app.listen(443);
+listen(443);
 ```
 
 ## Defaults
@@ -155,9 +175,10 @@ Default configuration:
 
 ```javascript
 {
+  env: 'development',
   logging: { enabled: false },
   throttle: { enabled: false },
-  cache: { adapter: 'memory', ttl: 3600 },
+  cache: { type: 'memory', retention: 3600 },
   https: { enabled: false },
   autoRedirect: false,
   errorTracking: false

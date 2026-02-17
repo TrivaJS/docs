@@ -23,14 +23,17 @@ npm install triva
 Create `server.js`:
 
 ```javascript
-const Triva = require('triva');
-const app = new Triva();
+import { build, get, listen } from 'triva';
 
-app.get('/', (req, res) => {
+await build({
+  env: 'development'
+});
+
+get('/', (req, res) => {
   res.json({ status: 'running' });
 });
 
-app.listen(3000);
+listen(3000);
 ```
 
 ## Run the Server
@@ -48,35 +51,20 @@ Visit `http://localhost:3000` to see your server running.
 Install only the adapters you need:
 
 ```bash
-npm install mongodb      # MongoDB
-npm install pg           # PostgreSQL  
-npm install mysql2       # MySQL
-npm install redis        # Redis
-npm install better-sqlite3  # SQLite
+npm install mongodb          # MongoDB
+npm install pg               # PostgreSQL  
+npm install mysql2           # MySQL
+npm install redis            # Redis
+npm install better-sqlite3   # SQLite
 ```
 
 ### Extensions
 
 ```bash
-npm install @triva/cors      # CORS middleware
-npm install @triva/jwt       # JWT authentication  
-npm install @triva/cli       # CLI tools
-npm install @triva/shortcuts # Developer shortcuts
-```
-
-## TypeScript Support
-
-Triva includes TypeScript definitions:
-
-```bash
-npm install --save-dev @types/node
-```
-
-```javascript
-import Triva from 'triva';
-
-const app = new Triva();
-app.listen(3000);
+npm install @triva/cors       # CORS middleware
+npm install @triva/jwt        # JWT authentication  
+npm install @triva/cli        # CLI tools
+npm install @triva/shortcuts  # Developer shortcuts
 ```
 
 ## Next Steps
