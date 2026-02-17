@@ -158,7 +158,7 @@ main {
 
 pre {
   position: relative;
-  background: #15151d;
+  background: #111111;
   border: 1px solid #88888836;
   padding: 12px;
   overflow-x: auto;
@@ -300,7 +300,7 @@ hr {
   background: #27272a;
   border: 1px solid #3f3f46;
   border-radius: 6px;
-  padding: 6px 8px;
+  padding: 6px 6px;
   cursor: pointer;
   opacity: 0;
   transition: all 0.2s ease;
