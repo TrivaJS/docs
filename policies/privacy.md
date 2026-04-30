@@ -14,14 +14,14 @@ This Privacy Policy explains how Triva ("we", "our", "the Software") handles dat
 
 **NOTHING.** Triva does not collect any data:
 
-❌ No telemetry  
-❌ No analytics  
-❌ No usage tracking  
-❌ No crash reports  
-❌ No user accounts  
-❌ No registration required  
-❌ No phone home  
-❌ No cookies (from us)  
+ No telemetry  
+ No analytics  
+ No usage tracking  
+ No crash reports  
+ No user accounts  
+ No registration required  
+ No phone home  
+ No cookies (from us)  
 
 ### Update Notifications
 
@@ -61,7 +61,7 @@ When YOU build applications using Triva:
 
 ```javascript
 // You build a simple API
-get('/api/data', (req, res) => {
+app.get('/api/data', (req, res) => {
   res.json({ message: 'Hello' });
 });
 ```
@@ -77,7 +77,7 @@ get('/api/data', (req, res) => {
 
 ```javascript
 // You store user data
-post('/api/users', async (req, res) => {
+app.post('/api/users', async (req, res) => {
   const userData = await req.json();
   await db.save(userData);  // YOU store this data
 });
@@ -97,7 +97,7 @@ post('/api/users', async (req, res) => {
 
 ```javascript
 // You implement authentication
-post('/login', async (req, res) => {
+app.post('/login', async (req, res) => {
   const { email, password } = await req.json();
   // YOU handle credentials
 });
@@ -167,7 +167,7 @@ If YOU implement cookies in your Triva app:
 
 **Example Cookie Notice:**
 ```javascript
-get('/', (req, res) => {
+app.get('/', (req, res) => {
   // YOU set cookies
   res.setHeader('Set-Cookie', 'session=abc123');
   
@@ -363,7 +363,7 @@ We have no data to provide. Contact app developers directly.
 
 ### Best Practices with Triva
 
-✅ **DO:**
+ **DO:**
 - Minimize data collection
 - Use HTTPS always
 - Implement encryption
@@ -371,7 +371,7 @@ We have no data to provide. Contact app developers directly.
 - Be transparent
 - Follow privacy-by-design
 
-❌ **DON'T:**
+ **DON'T:**
 - Collect unnecessary data
 - Store sensitive data without encryption
 - Skip consent mechanisms
@@ -381,10 +381,10 @@ We have no data to provide. Contact app developers directly.
 ### Example: Privacy-Focused API
 
 ```javascript
-import { build, get, listen } from 'triva';
+import { build } from 'triva';
 import fs from 'fs';
 
-await build({
+const app = new build({
   protocol: 'https',  // Always use HTTPS
   ssl: {
     key: fs.readFileSync('key.pem'),
@@ -392,14 +392,14 @@ await build({
   }
 });
 
-get('/api/data', (req, res) => {
+app.get('/api/data', (req, res) => {
   // Don't log sensitive data
   // Don't store unnecessary data
   // Minimal response
   res.json({ status: 'ok' });
 });
 
-listen(443);
+app.listen(443);
 ```
 
 ---

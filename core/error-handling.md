@@ -1,200 +1,112 @@
 # Error Handling
 
-## Try/Catch Pattern
+Triva supports both explicit route-local error handling and global error hooks.
+
+## Route-Local Try/Catch
 
 ```javascript
-import { build, get, listen } from 'triva';
+import { build } from 'triva';
 
-await build({ env: 'development' });
+const app = new build({ env: 'development' });
 
-get('/api/user/:id', (req, res) => {
+app.get('/api/users/:id', async (req, res) => {
   try {
-    const user = getUserById(req.params.id);
+    const user = await loadUser(req.params.id);
+
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
     res.json(user);
-  } catch (err) {
-    res.status(500).json({ error: err.message });
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to load user' });
   }
 });
 
-listen(3000);
+app.listen(3000);
 ```
 
-## Async Error Handling
+## Handle Invalid JSON
 
 ```javascript
-import { build, get, cache, listen } from 'triva';
-
-await build({
-  env: 'development',
-  cache: {
-    type: 'mongodb',
-    url: 'mongodb://localhost:27017/myapp'
-  }
-});
-
-get('/api/posts', async (req, res) => {
+app.post('/api/users', async (req, res) => {
   try {
-    // Cache is configured with MongoDB adapter
-    const posts = await cache.get('posts');
-    res.json(posts);
-  } catch (err) {
-    console.error('Cache error:', err);
-    res.status(500).json({ error: 'Cache error' });
-  }
-});
+    const body = await req.json();
 
-listen(3000);
-```
-
-## Error Middleware
-
-```javascript
-import { build, use, listen } from 'triva';
-
-await build({ env: 'development' });
-
-use((req, res, next) => {
-  try {
-    // Your code
-    next();
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
-
-listen(3000);
-```
-
-## Validation Errors
-
-```javascript
-import { build, post, listen } from 'triva';
-
-await build({ env: 'development' });
-
-post('/api/users', (req, res) => {
-  const { email, password } = req.body;
-  
-  if (!email) {
-    return res.status(400).json({ error: 'Email required' });
-  }
-  
-  if (!password || password.length < 8) {
-    return res.status(400).json({ error: 'Password must be 8+ characters' });
-  }
-  
-  // Create user...
-  res.status(201).json({ email });
-});
-
-listen(3000);
-```
-
-## Not Found Handler
-
-```javascript
-import { build, get, listen } from 'triva';
-
-await build({ env: 'development' });
-
-// Define your routes
-get('/', (req, res) => res.send('Home'));
-get('/about', (req, res) => res.send('About'));
-
-// Wildcard route at the end for 404s
-get('*', (req, res) => {
-  res.status(404).json({ error: 'Not Found' });
-});
-
-listen(3000);
-```
-
-## Cache Errors
-
-```javascript
-import { build, get, cache, listen } from 'triva';
-
-await build({
-  env: 'development',
-  cache: {
-    type: 'redis',
-    url: 'redis://localhost:6379'
-  }
-});
-
-get('/api/data', async (req, res) => {
-  try {
-    const data = await cache.get('collection');
-    res.json(data);
-  } catch (err) {
-    if (err.code === 'CONNECTION_ERROR') {
-      return res.status(503).json({ error: 'Cache unavailable' });
+    if (!body.email) {
+      return res.status(400).json({ error: 'Email is required' });
     }
-    res.status(500).json({ error: 'Internal error' });
+
+    res.status(201).json(body);
+  } catch {
+    res.status(400).json({ error: 'Invalid JSON body' });
+  }
+});
+```
+
+## Global Error Handler
+
+```javascript
+app.setErrorHandler((error, req, res) => {
+  console.error(error);
+  res.status(500).json({
+    error: 'Internal Server Error',
+    path: req.url
+  });
+});
+```
+
+If a route throws and you do not catch it yourself, Triva forwards that failure to the error handler.
+
+## Custom 404 Handler
+
+```javascript
+app.setNotFoundHandler((req, res) => {
+  res.status(404).json({
+    error: 'Route not found',
+    path: req.url
+  });
+});
+```
+
+## Error Tracking
+
+```javascript
+import { build, errorTracker } from 'triva';
+
+const app = new build({
+  errorTracking: {
+    enabled: true,
+    maxEntries: 10000
   }
 });
 
-listen(3000);
-```
-
-## Custom Error Class
-
-```javascript
-import { build, get, listen } from 'triva';
-
-await build({ env: 'development' });
-
-class AppError extends Error {
-  constructor(message, statusCode) {
-    super(message);
-    this.statusCode = statusCode;
-  }
-}
-
-get('/api/resource/:id', (req, res) => {
-  try {
-    const resource = findResource(req.params.id);
-    if (!resource) {
-      throw new AppError('Resource not found', 404);
-    }
-    res.json(resource);
-  } catch (err) {
-    if (err instanceof AppError) {
-      return res.status(err.statusCode).json({ error: err.message });
-    }
-    res.status(500).json({ error: 'Internal error' });
-  }
+app.get('/admin/errors', async (req, res) => {
+  const errors = await errorTracker.get({ resolved: false, limit: 50 });
+  res.json(errors);
 });
-
-listen(3000);
 ```
 
-## Logging Errors
+## Manual Capture
 
 ```javascript
-import { build, get, listen } from 'triva';
-
-await build({ env: 'development' });
-
-get('/api/data', async (req, res) => {
+app.get('/risky', async (req, res) => {
   try {
-    const data = await fetchData();
-    res.json(data);
-  } catch (err) {
-    console.error('Error:', {
-      message: err.message,
-      stack: err.stack,
-      url: req.url,
-      method: req.method
+    await performRiskyWork();
+    res.json({ ok: true });
+  } catch (error) {
+    await errorTracker.capture(error, {
+      req,
+      phase: 'route',
+      custom: { endpoint: '/risky' }
     });
-    res.status(500).json({ error: 'Internal error' });
+    res.status(500).json({ error: 'Operation failed' });
   }
 });
-
-listen(3000);
 ```
 
-## Next Steps
+## Related Docs
 
-- [Middleware Guide](https://docs.trivajs.com/core/middleware)
-- [Configuration](https://docs.trivajs.com/core/configuration)
+- [Error Tracking](https://docs.trivajs.com/middleware/error-tracking)
+- [Request Object](https://docs.trivajs.com/core/request)
+- [Response Object](https://docs.trivajs.com/core/response)
