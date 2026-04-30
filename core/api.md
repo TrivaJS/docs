@@ -1,278 +1,174 @@
 # API Reference
 
-Complete list of Triva's core API.
+This page covers the public Triva surface that is visible in the current runtime and type definitions.
 
-## Configuration
-
-### build(options)
-
-Configure and initialize the server.
+## Create An App
 
 ```javascript
 import { build } from 'triva';
 
-await build({
-  env: 'development',
-  logging: { enabled: true },
-  cache: { type: 'memory' }
+const app = new build({ env: 'development' });
+```
+
+## Application Methods
+
+### Routing
+
+```javascript
+app.get(path, ...handlers)
+app.post(path, ...handlers)
+app.put(path, ...handlers)
+app.del(path, ...handlers)
+app.delete(path, ...handlers)
+app.patch(path, ...handlers)
+app.all(path, ...handlers)
+app.route(path)
+```
+
+Example:
+
+```javascript
+app.get('/api/users/:id', (req, res) => {
+  res.json({ id: req.params.id });
+});
+
+app.post('/api/users', async (req, res) => {
+  const body = await req.json();
+  res.status(201).json(body);
 });
 ```
 
-[Configuration Details](https://docs.trivajs.com/core/configuration)
-
-### listen(port, callback)
-
-Start the HTTP server.
+### Middleware
 
 ```javascript
-import { listen } from 'triva';
-
-listen(3000, () => {
-  console.log('Server running');
-});
+app.use(middleware)
 ```
 
-### use(middleware)
-
-Add middleware to the application.
+Example:
 
 ```javascript
-import { use } from 'triva';
-
-use((req, res, next) => {
-  console.log('Request received');
+app.use((req, res, next) => {
+  console.log(`${req.method} ${req.url}`);
   next();
 });
 ```
 
-[Middleware Guide](https://docs.trivajs.com/core/middleware)
-
-## Route Methods
-
-### get(path, handler)
-
-Handle GET requests.
+### Error and 404 Handlers
 
 ```javascript
-import { get } from 'triva';
+app.setErrorHandler((err, req, res) => {
+  res.status(500).json({ error: 'Internal Server Error' });
+});
 
-get('/users', (req, res) => {
-  res.json({ users: [] });
+app.setNotFoundHandler((req, res) => {
+  res.status(404).json({ error: 'Route not found' });
 });
 ```
 
-### post(path, handler)
-
-Handle POST requests.
+### Settings and Views
 
 ```javascript
-import { post } from 'triva';
+app.set(key, value)
+app.get(key)
+app.enable(key)
+app.disable(key)
+app.enabled(key)
+app.disabled(key)
+app.engine(ext, fn)
+```
 
-post('/users', (req, res) => {
-  res.json({ created: req.body });
+### Server Startup
+
+```javascript
+app.listen(port, callback)
+```
+
+## Request Helpers
+
+Triva adds these helpers before your route handler runs:
+
+- `req.params`
+- `req.query`
+- `req.pathname`
+- `req.json()`
+- `req.text()`
+
+Example:
+
+```javascript
+app.post('/api/users/:id', async (req, res) => {
+  const body = await req.json();
+
+  res.json({
+    id: req.params.id,
+    search: req.query.search,
+    pathname: req.pathname,
+    body
+  });
 });
 ```
 
-### put(path, handler)
+## Response Helpers
 
-Handle PUT requests.
+Triva binds these helpers onto `res`:
+
+- `res.status(code)`
+- `res.header(name, value)`
+- `res.json(data)`
+- `res.send(data)`
+- `res.html(html)`
+- `res.redirect(url, code?)`
+- `res.jsonp(data, callbackParam?)`
+- `res.download(filepath, filename?)`
+- `res.sendFile(filepath, options?)`
+- `res.render(view, locals?, callback?)`
+- `res.end(data?)`
+
+Example:
 
 ```javascript
-import { put } from 'triva';
+app.get('/download', (req, res) => {
+  res.download('./reports/latest.pdf');
+});
 
-put('/users/:id', (req, res) => {
-  res.json({ updated: req.params.id });
+app.get('/legacy', (req, res) => {
+  res.redirect('/new-location', 301);
 });
 ```
 
-### del(path, handler)
+## Cache API
 
-Handle DELETE requests.
-
-```javascript
-import { del } from 'triva';
-
-del('/users/:id', (req, res) => {
-  res.json({ deleted: req.params.id });
-});
-```
-
-### patch(path, handler)
-
-Handle PATCH requests.
-
-```javascript
-import { patch } from 'triva';
-
-patch('/users/:id', (req, res) => {
-  res.json({ patched: req.params.id });
-});
-```
-
-[Routing Guide](https://docs.trivajs.com/core/routing)
-
-## Request Object
-
-### req.method
-
-HTTP method (GET, POST, etc.)
-
-### req.url
-
-Request URL path
-
-### req.headers
-
-Request headers object
-
-### req.query
-
-Query string parameters
-
-```javascript
-// /search?q=test&limit=10
-req.query.q      // 'test'
-req.query.limit  // '10'
-```
-
-### req.params
-
-Route parameters
-
-```javascript
-// Route: /users/:id
-// Request: /users/123
-req.params.id  // '123'
-```
-
-### req.body
-
-Parsed request body (JSON or text)
-
-```javascript
-// POST with JSON body
-req.body.username  // Access properties
-```
-
-[Request Reference](https://docs.trivajs.com/core/request)
-
-## Response Object
-
-### res.json(data)
-
-Send JSON response.
-
-```javascript
-res.json({ status: 'ok', data: [] });
-```
-
-### res.send(text)
-
-Send text response.
-
-```javascript
-res.send('Hello World');
-```
-
-### res.status(code)
-
-Set HTTP status code.
-
-```javascript
-res.status(404).json({ error: 'Not found' });
-```
-
-### res.redirect(url)
-
-Redirect to another URL.
-
-```javascript
-res.redirect('/login');
-```
-
-### res.header(name, value)
-
-Set response header.
-
-```javascript
-res.header('Content-Type', 'application/json');
-```
-
-[Response Reference](https://docs.trivajs.com/core/response)
-
-## Cache Object
-
-### cache.set(key, value, ttl)
-
-Store value in cache.
+The exported `cache` singleton exposes the runtime cache adapter.
 
 ```javascript
 import { cache } from 'triva';
 
-await cache.set('user:123', userData, 3600);
-```
-
-### cache.get(key)
-
-Retrieve value from cache.
-
-```javascript
-const data = await cache.get('user:123');
-```
-
-### cache.delete(key)
-
-Remove value from cache.
-
-```javascript
-await cache.delete('user:123');
-```
-
-### cache.clear()
-
-Clear all cache entries.
-
-```javascript
+await cache.set('user:1', { id: 1, name: 'Alice' }, 300000);
+const user = await cache.get('user:1');
+const exists = await cache.has('user:1');
+const keys = await cache.keys('user:*');
+await cache.delete('user:1');
 await cache.clear();
-```
-
-### cache.stats()
-
-Get cache statistics.
-
-```javascript
 const stats = await cache.stats();
 ```
 
-## Database Configuration
+TTL values are in milliseconds.
 
-Database is configured in `build()`, not accessed directly:
+## Other Exports
 
-```javascript
-await build({
-  cache: {
-    type: 'redis',
-    url: 'redis://localhost:6379'
-  }
-});
-```
+Useful additional exports from `triva` include:
 
-Supported adapters:
-- memory
-- redis
-- mongodb
-- postgresql
-- mysql
-- sqlite
-- better-sqlite3
-- supabase
-- embedded
+- `middleware`
+- `errorTracker`
+- `log`
+- `cookieParser`
+- `configCache`
+- `createAdapter`
+- `isAI`, `isBot`, `isCrawler`
 
-[Database Guide](https://docs.trivajs.com/database/overview)
+## Related Docs
 
-## Next Steps
-
-- [Routing Details](https://docs.trivajs.com/core/routing)
 - [Request Object](https://docs.trivajs.com/core/request)
 - [Response Object](https://docs.trivajs.com/core/response)
-- [Configuration Options](https://docs.trivajs.com/core/configuration)
+- [Routing](https://docs.trivajs.com/core/routing)
+- [Configuration](https://docs.trivajs.com/core/configuration)

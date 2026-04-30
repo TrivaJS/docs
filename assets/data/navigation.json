@@ -1,156 +1,274 @@
 {
-    "navigation": [
+  "navigation": [
+    {
+      "title": "Welcome",
+      "children": [
         {
-            "title": "Getting Started",
-            "path": "/getting-started"
+          "title": "Getting Started",
+          "path": "/getting-started"
         },
         {
-            "title": "Installation",
-            "path": "/installation"
+          "title": "Installation",
+          "path": "/installation"
         },
         {
-            "title": "Changes",
-            "path": "/changes"
+          "title": "Support and Issues",
+          "path": "/issues"
         },
         {
-            "title": "RoadMap",
-            "path": "/roadmap"
-        },
-        {
-            "title": "Quick Start",
-            "children": [
-                {
-                  "title": "First Server",
-                  "path": "/quick-start/first-server"
-                },
-                {
-                  "title": "Examples",
-                  "path": "/quick-start/examples"
-                }
-            ]
-        },
-        {
-            "title": "Core",
-            "children": [
-                {
-                  "title": "API References",
-                  "path": "/core/api"
-                },
-                {
-                  "title": "Configuration",
-                  "path": "/core/configuration"
-                },
-                {
-                  "title": "Request",
-                  "path": "/core/request"
-                },
-                {
-                  "title": "Response",
-                  "path": "/core/response"
-                },
-                {
-                  "title": "Routing",
-                  "path": "/core/routing"
-                },
-                {
-                  "title": "Middleware",
-                  "path": "/core/middleware"
-                },
-                {
-                  "title": "Error Handling",
-                  "path": "/core/error-handling"
-                },
-                {
-                  "title": "Concepts",
-                  "path": "/core/concepts"
-                }
-            ]
-        },
-        {
-            "title": "Middleware",
-            "children": [
-                {
-                  "title": "Overview",
-                  "path": "/middleware/overview"
-                },
-                {
-                  "title": "Throttling",
-                  "path": "/middleware/throttling"
-                },
-                {
-                  "title": "Logging",
-                  "path": "/middleware/logging"
-                },
-                {
-                  "title": "Cors",
-                  "path": "/middleware/cors"
-                },
-                {
-                  "title": "Error Tracking",
-                  "path": "/middleware/error-tracking"
-                },
-                {
-                  "title": "Custom",
-                  "path": "/middleware/custom"
-                },
-                {
-                  "title": "Order",
-                  "path": "/middleware/order"
-                }
-            ]
-        },
-        {
-            "title": "Database & Cache",
-            "children": [
-                {
-                  "title": "Overview",
-                  "path": "/database/overview"
-                },
-                {
-                  "title": "Quick Start",
-                  "path": "/database/quick-start"
-                },
-                {
-                  "title": "Adapters",
-                  "path": "/database/adapters"
-                },
-                {
-                  "title": "MongoDB",
-                  "path": "/database/mongodb"
-                },
-                {
-                  "title": "PostgreSQL",
-                  "path": "/database/postgresql"
-                },
-                {
-                  "title": "MySQL",
-                  "path": "/database/mysql"
-                },
-                {
-                  "title": "Redis",
-                  "path": "/database/redis"
-                },
-                {
-                  "title": "SQLite",
-                  "path": "/database/sqlite"
-                },
-                {
-                  "title": "Better-SQLite3",
-                  "path": "/database/better-sqlite3"
-                },
-                {
-                  "title": "Supabase",
-                  "path": "/database/supabase"
-                },
-                {
-                  "title": "Embedded",
-                  "path": "/database/embedded"
-                },
-                {
-                  "title": "Memory",
-                  "path": "/database/memory"
-                }
-            ]
+          "title": "Docs Workspace",
+          "path": "/README"
         }
-    ]
+      ]
+    },
+    {
+      "title": "Project",
+      "children": [
+        {
+          "title": "Changes",
+          "path": "/changes"
+        },
+        {
+          "title": "Roadmap",
+          "path": "/roadmap"
+        },
+        {
+          "title": "Benchmarks",
+          "path": "/benchmarks"
+        }
+      ]
+    },
+    {
+      "title": "Quick Start",
+      "children": [
+        {
+          "title": "First Server",
+          "path": "/quick-start/first-server"
+        },
+        {
+          "title": "Examples",
+          "path": "/quick-start/examples"
+        }
+      ]
+    },
+    {
+      "title": "Core",
+      "children": [
+        {
+          "title": "API Reference",
+          "path": "/core/api"
+        },
+        {
+          "title": "Configuration",
+          "path": "/core/configuration"
+        },
+        {
+          "title": "Request",
+          "path": "/core/request"
+        },
+        {
+          "title": "Response",
+          "path": "/core/response"
+        },
+        {
+          "title": "Routing",
+          "path": "/core/routing"
+        },
+        {
+          "title": "Middleware",
+          "path": "/core/middleware"
+        },
+        {
+          "title": "Error Handling",
+          "path": "/core/error-handling"
+        },
+        {
+          "title": "Concepts",
+          "path": "/core/concepts"
+        }
+      ]
+    },
+    {
+      "title": "Middleware",
+      "children": [
+        {
+          "title": "Overview",
+          "path": "/middleware/overview"
+        },
+        {
+          "title": "Throttling",
+          "path": "/middleware/throttling"
+        },
+        {
+          "title": "Logging",
+          "path": "/middleware/logging"
+        },
+        {
+          "title": "CORS",
+          "path": "/middleware/cors"
+        },
+        {
+          "title": "Error Tracking",
+          "path": "/middleware/error-tracking"
+        },
+        {
+          "title": "Custom",
+          "path": "/middleware/custom"
+        },
+        {
+          "title": "Order",
+          "path": "/middleware/order"
+        }
+      ]
+    },
+    {
+      "title": "Database and Cache",
+      "children": [
+        {
+          "title": "Overview",
+          "path": "/database/overview"
+        },
+        {
+          "title": "Quick Start",
+          "path": "/database/quick-start"
+        },
+        {
+          "title": "Adapters",
+          "path": "/database/adapters"
+        },
+        {
+          "title": "MongoDB",
+          "path": "/database/mongodb"
+        },
+        {
+          "title": "PostgreSQL",
+          "path": "/database/postgresql"
+        },
+        {
+          "title": "MySQL",
+          "path": "/database/mysql"
+        },
+        {
+          "title": "Redis",
+          "path": "/database/redis"
+        },
+        {
+          "title": "SQLite",
+          "path": "/database/sqlite"
+        },
+        {
+          "title": "Better-SQLite3",
+          "path": "/database/better-sqlite3"
+        },
+        {
+          "title": "Supabase",
+          "path": "/database/supabase"
+        },
+        {
+          "title": "Embedded",
+          "path": "/database/embedded"
+        },
+        {
+          "title": "Memory",
+          "path": "/database/memory"
+        }
+      ]
+    },
+    {
+      "title": "Deployment",
+      "children": [
+        {
+          "title": "HTTPS",
+          "path": "/deployment/https"
+        },
+        {
+          "title": "Production",
+          "path": "/deployment/production"
+        }
+      ]
+    },
+    {
+      "title": "Examples",
+      "children": [
+        {
+          "title": "REST API",
+          "path": "/examples/rest-api"
+        },
+        {
+          "title": "Caching",
+          "path": "/examples/caching"
+        },
+        {
+          "title": "Authentication",
+          "path": "/examples/authentication"
+        },
+        {
+          "title": "File Upload",
+          "path": "/examples/file-upload"
+        },
+        {
+          "title": "Error Handling",
+          "path": "/examples/error-handling"
+        },
+        {
+          "title": "Production Ready",
+          "path": "/examples/production-ready"
+        }
+      ]
+    },
+    {
+      "title": "Extensions",
+      "children": [
+        {
+          "title": "Overview",
+          "path": "/extensions/overview"
+        },
+        {
+          "title": "CORS",
+          "path": "/extensions/cors"
+        },
+        {
+          "title": "JWT",
+          "path": "/extensions/jwt"
+        },
+        {
+          "title": "CLI",
+          "path": "/extensions/cli"
+        },
+        {
+          "title": "Shortcuts",
+          "path": "/extensions/shortcuts"
+        }
+      ]
+    },
+    {
+      "title": "Policies",
+      "children": [
+        {
+          "title": "Contributing",
+          "path": "/policies/contributing"
+        },
+        {
+          "title": "Funding",
+          "path": "/policies/funding"
+        },
+        {
+          "title": "Code of Conduct",
+          "path": "/policies/code-of-conduct"
+        },
+        {
+          "title": "Privacy",
+          "path": "/policies/privacy"
+        },
+        {
+          "title": "Terms",
+          "path": "/policies/terms"
+        },
+        {
+          "title": "Security Policy",
+          "path": "/policies/security"
+        }
+      ]
+    }
+  ]
 }

@@ -1,170 +1,137 @@
 # Quick Examples
 
-Five quick examples to get you started with Triva.
+A few short examples that match the current Triva API.
 
-## 1. Basic REST API
+## 1. REST-Style Routes
 
 ```javascript
-import { build, get, post, put, del, listen } from 'triva';
+import { build } from 'triva';
 
-await build({ env: 'development' });
+const app = new build({ env: 'development' });
 
 let users = [
   { id: 1, name: 'Alice' },
   { id: 2, name: 'Bob' }
 ];
 
-get('/api/users', (req, res) => {
+app.get('/api/users', (req, res) => {
   res.json(users);
 });
 
-get('/api/users/:id', (req, res) => {
-  const user = users.find(u => u.id === parseInt(req.params.id));
-  user ? res.json(user) : res.status(404).json({ error: 'Not found' });
+app.get('/api/users/:id', (req, res) => {
+  const user = users.find((entry) => entry.id === Number(req.params.id));
+
+  if (!user) {
+    return res.status(404).json({ error: 'User not found' });
+  }
+
+  res.json(user);
 });
 
-post('/api/users', (req, res) => {
-  const user = { id: users.length + 1, ...req.body };
+app.post('/api/users', async (req, res) => {
+  const body = await req.json();
+  const user = { id: users.length + 1, ...body };
   users.push(user);
   res.status(201).json(user);
 });
 
-listen(3000);
+app.listen(3000);
 ```
 
-[Full REST API Example](https://docs.trivajs.com/examples/rest-api)
-
-## 2. Middleware Usage
+## 2. Custom Middleware
 
 ```javascript
-import { build, get, use, listen } from 'triva';
-
-await build({ env: 'development' });
-
-const authMiddleware = (req, res, next) => {
-  const token = req.headers.authorization;
-  if (!token) {
+const requireAuth = (req, res, next) => {
+  if (!req.headers.authorization) {
     return res.status(401).json({ error: 'Unauthorized' });
   }
   next();
 };
 
-const logMiddleware = (req, res, next) => {
-  console.log(`${new Date().toISOString()} - ${req.method} ${req.url}`);
-  next();
-};
-
-use(logMiddleware);
-
-get('/public', (req, res) => {
-  res.json({ message: 'Public endpoint' });
+app.get('/private', requireAuth, (req, res) => {
+  res.json({ secret: true });
 });
-
-get('/private', authMiddleware, (req, res) => {
-  res.json({ message: 'Private data' });
-});
-
-listen(3000);
 ```
 
-[Middleware Guide](https://docs.trivajs.com/core/middleware)
-
-## 3. Database Integration
+## 3. Cache-Aside Pattern
 
 ```javascript
-import { build, get, post, cache, listen } from 'triva';
+import { build, cache } from 'triva';
 
-await build({
-  env: 'development',
-  database: {
-    adapter: 'mongodb',
-    url: 'mongodb://localhost:27017/myapp'
-  }
-});
-
-get('/api/posts', async (req, res) => {
-  const posts = await cache.find('posts', {});
-  res.json(posts);
-});
-
-post('/api/posts', async (req, res) => {
-  const post = await cache.insert('posts', req.body);
-  res.status(201).json(post);
-});
-
-listen(3000);
-```
-
-[Database Guide](https://docs.trivajs.com/database/overview)
-
-## 4. Caching Layer
-
-```javascript
-import { build, get, cache, listen } from 'triva';
-
-await build({
-  env: 'development',
+const app = new build({
   cache: {
     type: 'redis',
-    url: 'redis://localhost:6379'
+    retention: 300000,
+    database: {
+      url: process.env.REDIS_URL || 'redis://localhost:6379'
+    }
   }
 });
 
-get('/api/expensive', async (req, res) => {
-  const cacheKey = 'expensive-data';
-  const cached = await cache.get(cacheKey);
-  
+app.get('/api/posts/:id', async (req, res) => {
+  const key = `post:${req.params.id}`;
+  const cached = await cache.get(key);
+
   if (cached) {
-    return res.json({ data: cached, cached: true });
+    return res.json({ source: 'cache', data: cached });
   }
-  
-  const data = await performExpensiveOperation();
-  await cache.set(cacheKey, data, 300);
-  
-  res.json({ data, cached: false });
+
+  const post = await loadPost(req.params.id);
+  await cache.set(key, post, 300000);
+  res.json({ source: 'origin', data: post });
 });
-
-async function performExpensiveOperation() {
-  return { result: 'computed', timestamp: Date.now() };
-}
-
-listen(3000);
 ```
 
-[Caching Guide](https://docs.trivajs.com/examples/caching)
-
-## 5. HTTPS Server
+## 4. JWT Authentication
 
 ```javascript
-import { build, get, listen } from 'triva';
-import { readFileSync } from 'fs';
+import { sign, protect } from '@triva/jwt';
 
-await build({
-  env: 'production',
-  https: {
-    enabled: true,
-    key: readFileSync('./ssl/key.pem'),
-    cert: readFileSync('./ssl/cert.pem')
-  },
-  autoRedirect: true
+app.post('/auth/login', async (req, res) => {
+  const { email, password } = await req.json();
+  const user = await verifyCredentials(email, password);
+
+  if (!user) {
+    return res.status(401).json({ error: 'Invalid credentials' });
+  }
+
+  const token = sign(
+    { userId: user.id, role: user.role },
+    process.env.JWT_SECRET,
+    { expiresIn: '24h' }
+  );
+
+  res.json({ token });
 });
 
-get('/', (req, res) => {
+app.get('/api/profile', protect(), (req, res) => {
+  res.json({ user: req.user });
+});
+```
+
+## 5. Direct HTTPS Startup
+
+```javascript
+import { readFileSync } from 'fs';
+
+const secureApp = new build({
+  protocol: 'https',
+  ssl: {
+    key: readFileSync('./ssl/key.pem'),
+    cert: readFileSync('./ssl/cert.pem')
+  }
+});
+
+secureApp.get('/', (req, res) => {
   res.json({ secure: true });
 });
 
-listen(443);
+secureApp.listen(3443);
 ```
 
-[HTTPS Guide](https://docs.trivajs.com/deployment/https)
+## Related Docs
 
-## Try These Next
-
+- [REST API Example](https://docs.trivajs.com/examples/rest-api)
 - [Authentication Example](https://docs.trivajs.com/examples/authentication)
-- [File Upload Example](https://docs.trivajs.com/examples/file-upload)
-- [Error Handling Example](https://docs.trivajs.com/examples/error-handling)
-- [Production Setup](https://docs.trivajs.com/examples/production-ready)
-
-## Common Patterns
-
-See the [Core Concepts](https://docs.trivajs.com/core/concepts) for more detailed explanations of routing, middleware, and request handling.
+- [Caching Example](https://docs.trivajs.com/examples/caching)
+- [HTTPS Deployment](https://docs.trivajs.com/deployment/https)

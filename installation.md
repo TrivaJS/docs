@@ -2,15 +2,8 @@
 
 ## Requirements
 
-- Node.js 18.0.0 or higher
-- npm 8.0.0 or higher
-
-## Verify Node.js
-
-```bash
-node --version
-npm --version
-```
+- Node.js 18 or newer
+- npm 8 or newer
 
 ## Install Triva
 
@@ -18,57 +11,51 @@ npm --version
 npm install triva
 ```
 
-## Create Your First App
-
-Create `server.js`:
+## Create A Starter App
 
 ```javascript
-import { build, get, listen } from 'triva';
+import { build } from 'triva';
 
-await build({
-  env: 'development'
-});
+const app = new build({ env: 'development' });
 
-get('/', (req, res) => {
+app.get('/', (req, res) => {
   res.json({ status: 'running' });
 });
 
-listen(3000);
+app.listen(3000);
 ```
 
-## Run the Server
+## Run It
 
 ```bash
 node server.js
 ```
 
-Visit `http://localhost:3000` to see your server running.
+## Optional Adapter Packages
 
-## Optional Dependencies
-
-### Database Adapters
-
-Install only the adapters you need:
+Install only the adapters you plan to use:
 
 ```bash
-npm install mongodb          # MongoDB
-npm install pg               # PostgreSQL  
-npm install mysql2           # MySQL
-npm install redis            # Redis
-npm install better-sqlite3   # SQLite
+npm install mongodb
+npm install pg
+npm install mysql2
+npm install redis
+npm install sqlite3
+npm install better-sqlite3
+npm install @supabase/supabase-js
 ```
 
-### Extensions
+## Official Extensions
 
 ```bash
-npm install @triva/cors       # CORS middleware
-npm install @triva/jwt        # JWT authentication  
-npm install @triva/cli        # CLI tools
-npm install @triva/shortcuts  # Developer shortcuts
+npm install @trivajs/cors
+npm install @triva/jwt
+npm install -g @trivajs/cli
+npm install @trivajs/shortcuts
 ```
 
 ## Next Steps
 
+- [Getting Started](https://docs.trivajs.com/getting-started)
 - [First Server Tutorial](https://docs.trivajs.com/quick-start/first-server)
-- [Quick Examples](https://docs.trivajs.com/quick-start/examples)
-- [Configuration Options](https://docs.trivajs.com/core/configuration)
+- [Configuration](https://docs.trivajs.com/core/configuration)
