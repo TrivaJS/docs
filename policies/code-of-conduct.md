@@ -12,31 +12,31 @@ We pledge to act and interact in ways that contribute to an open, welcoming, div
 
 Examples of behavior that contributes to a positive environment:
 
-*  Using welcoming and inclusive language
-*  Being respectful of differing viewpoints and experiences
-*  Gracefully accepting constructive criticism
-*  Focusing on what is best for the community
-*  Showing empathy towards other community members
-*  Giving and receiving feedback professionally
-*  Acknowledging and learning from mistakes
-*  Helping newcomers feel welcome
-*  Being patient with questions
-*  Celebrating others' successes
+* ✅ Using welcoming and inclusive language
+* ✅ Being respectful of differing viewpoints and experiences
+* ✅ Gracefully accepting constructive criticism
+* ✅ Focusing on what is best for the community
+* ✅ Showing empathy towards other community members
+* ✅ Giving and receiving feedback professionally
+* ✅ Acknowledging and learning from mistakes
+* ✅ Helping newcomers feel welcome
+* ✅ Being patient with questions
+* ✅ Celebrating others' successes
 
 ### Unacceptable Behavior
 
 Examples of unacceptable behavior:
 
-*  The use of sexualized language or imagery, and sexual attention or advances of any kind
-*  Trolling, insulting or derogatory comments, and personal or political attacks
-*  Public or private harassment
-*  Publishing others' private information without explicit permission
-*  Conduct which could reasonably be considered inappropriate in a professional setting
-*  Dismissing or attacking inclusion-focused requests
-*  Sustained disruption of discussions
-*  Pattern of inappropriate social contact
-*  Intentionally derailing conversations
-*  Spamming or excessive self-promotion
+* ❌ The use of sexualized language or imagery, and sexual attention or advances of any kind
+* ❌ Trolling, insulting or derogatory comments, and personal or political attacks
+* ❌ Public or private harassment
+* ❌ Publishing others' private information without explicit permission
+* ❌ Conduct which could reasonably be considered inappropriate in a professional setting
+* ❌ Dismissing or attacking inclusion-focused requests
+* ❌ Sustained disruption of discussions
+* ❌ Pattern of inappropriate social contact
+* ❌ Intentionally derailing conversations
+* ❌ Spamming or excessive self-promotion
 
 ## Enforcement Responsibilities
 
@@ -265,16 +265,16 @@ Effective date: February 11, 2026
 
 **Be kind, be respectful, be professional.**
 
-*  Welcome everyone
-*  Respect differences
-*  Communicate clearly
-*  Accept feedback
-*  Help others
+* ✅ Welcome everyone
+* ✅ Respect differences
+* ✅ Communicate clearly
+* ✅ Accept feedback
+* ✅ Help others
 
-*  No harassment
-*  No discrimination
-*  No trolling
-*  No spam
-*  No hate speech
+* ❌ No harassment
+* ❌ No discrimination
+* ❌ No trolling
+* ❌ No spam
+* ❌ No hate speech
 
 **Violations?** Report to contact@trivajs.com

@@ -1,131 +1,217 @@
 # Core Concepts
 
-Triva is centered on a single application instance created with `new build(options)`.
+Understanding Triva's architecture and design principles.
 
-## Application Model
+## Architecture Overview
 
-```javascript
-import { build } from 'triva';
+Triva uses a function-based API with these core components:
 
-const app = new build({ env: 'development' });
-
-app.get('/health', (req, res) => {
-  res.json({ status: 'ok' });
-});
-
-app.listen(3000);
-```
-
-The important part is that routes and middleware live on `app`. Triva is not a collection of top-level `get()` or `listen()` helpers.
+1. **build()** - Configure and initialize the server
+2. **HTTP Methods** - get(), post(), put(), del(), patch()
+3. **Middleware** - use() for request processing
+4. **Database** - database object for persistence
+5. **Cache** - cache object for performance
 
 ## Request Lifecycle
 
-1. Triva receives the incoming Node.js request.
-2. Registered middleware runs in order.
-3. The router matches the request path and method.
-4. Triva attaches request helpers such as `req.params`, `req.query`, `req.pathname`, `req.json()`, and `req.text()`.
-5. Your route handler runs and uses the response helpers on `res`.
+```
+Client Request
+    ↓
+HTTP Server
+    ↓
+Built-in Middleware (logging, throttling)
+    ↓
+Custom Middleware (use())
+    ↓
+Route Handler (get(), post(), etc.)
+    ↓
+Response
+```
 
-## Request Parsing Is Explicit
-
-Triva does not populate a magic `req.body` property for you. Parse the body inside handlers:
+## Basic Application
 
 ```javascript
-app.post('/api/users', async (req, res) => {
-  const body = await req.json();
-  res.status(201).json(body);
+import { build, get, listen } from 'triva';
+
+// Configure server
+await build({
+  env: 'development'
 });
+
+// Define routes
+get('/path', (req, res) => {
+  res.json({ message: 'Hello' });
+});
+
+// Start server
+listen(3000);
 ```
 
-Use `await req.text()` when the payload is plain text or a webhook signature workflow needs the raw body.
+## Request Object
 
-## Routing Model
+The `req` object contains:
+
+- `req.method` - HTTP method (GET, POST, etc.)
+- `req.url` - Request URL
+- `req.headers` - HTTP headers
+- `req.query` - Query parameters
+- `req.params` - Route parameters
+- `req.body` - Request body (parsed automatically)
+
+[Request Reference](https://docs.trivajs.com/core/request)
+
+## Response Object
+
+The `res` object provides:
+
+- `res.json(data)` - Send JSON response
+- `res.send(text)` - Send text response
+- `res.status(code)` - Set status code
+- `res.redirect(url)` - Redirect to URL
+- `res.header(name, value)` - Set header
+
+[Response Reference](https://docs.trivajs.com/core/response)
+
+## Routing
+
+Routes use function-based API:
 
 ```javascript
-app.get('/users', listUsers);
-app.post('/users', createUser);
-app.get('/users/:id', showUser);
-app.put('/users/:id', updateUser);
-app.del('/users/:id', destroyUser);
+import { build, get, post, put, del, listen } from 'triva';
+
+await build({ env: 'development' });
+
+get('/users', getAllUsers);
+post('/users', createUser);
+get('/users/:id', getUser);
+put('/users/:id', updateUser);
+del('/users/:id', deleteUser);
+
+listen(3000);
 ```
 
-Routes can also be chained with `app.route('/users/:id')` and can accept middleware handlers before the final route handler.
+[Routing Guide](https://docs.trivajs.com/core/routing)
 
-## Middleware Model
+## Middleware
 
-Middleware is the standard `(req, res, next)` shape:
+Middleware functions process requests:
 
 ```javascript
-app.use((req, res, next) => {
+import { build, use, get, listen } from 'triva';
+
+await build({ env: 'development' });
+
+use((req, res, next) => {
   console.log(`${req.method} ${req.url}`);
   next();
 });
+
+get('/', (req, res) => {
+  res.json({ message: 'Hello' });
+});
+
+listen(3000);
 ```
 
-Triva can also wire middleware for throttling and retention from constructor options.
+Built-in middleware:
+- Throttling (rate limiting)
+- Logging
+- Error tracking
+- Body parsing (automatic)
 
-## Cache Layer
+[Middleware Guide](https://docs.trivajs.com/core/middleware)
 
-The exported `cache` singleton is how Triva talks to the configured adapter.
+## Database Integration
+
+Optional database support with multiple adapters:
 
 ```javascript
-import { build, cache } from 'triva';
+import { build, cache, listen } from 'triva';
 
-const app = new build({
+await build({
+  env: 'development',
+  database: {
+    adapter: 'mongodb',
+    url: 'mongodb://localhost:27017/mydb'
+  }
+});
+
+await cache.insert('users', userData);
+const users = await cache.find('users', {});
+
+listen(3000);
+```
+
+[Database Guide](https://docs.trivajs.com/database/overview)
+
+## Caching
+
+Optional cache layer for performance:
+
+```javascript
+import { build, cache, listen } from 'triva';
+
+await build({
+  env: 'development',
   cache: {
-    type: 'memory',
-    retention: 300000
+    type: 'redis',
+    url: 'redis://localhost:6379'
   }
 });
 
-app.get('/reports/:id', async (req, res) => {
-  const key = `report:${req.params.id}`;
-  const cached = await cache.get(key);
+await cache.set('key', value, ttl);
+const value = await cache.get('key');
 
-  if (cached) {
-    return res.json({ source: 'cache', data: cached });
-  }
-
-  const report = await loadReport(req.params.id);
-  await cache.set(key, report, 300000);
-  res.json({ source: 'origin', data: report });
-});
+listen(3000);
 ```
 
-## Configuration Surface
+[Caching Guide](https://docs.trivajs.com/database/quick-start)
 
-The constructor options currently in active use are:
+## Configuration
 
-- `env`
-- `protocol`
-- `ssl`
-- `cache`
-- `throttle`
-- `retention`
-- `errorTracking`
-- `middleware`
-
-## HTTPS Model
-
-To run HTTPS directly from Triva, set `protocol: 'https'` and provide `ssl.key` and `ssl.cert`.
+Configure via build() options:
 
 ```javascript
-import { build } from 'triva';
-import { readFileSync } from 'fs';
+await build({
+  env: 'production',
+  logging: { enabled: true, level: 'info' },
+  throttle: { enabled: true, max: 100, window: 60000 },
+  cache: { type: 'memory' },
+  https: { enabled: true, key, cert }
+});
+```
 
-const app = new build({
-  protocol: 'https',
-  ssl: {
-    key: readFileSync('./ssl/key.pem'),
-    cert: readFileSync('./ssl/cert.pem')
+[Configuration Guide](https://docs.trivajs.com/core/configuration)
+
+## Error Handling
+
+Handle errors with try/catch:
+
+```javascript
+get('/route', (req, res) => {
+  try {
+    // Your code
+  } catch (err) {
+    res.status(500).json({ error: err.message });
   }
 });
 ```
 
-## Useful Links
+[Error Handling Guide](https://docs.trivajs.com/core/error-handling)
+
+## Production Features
+
+Built-in production capabilities:
+
+- HTTPS support with auto-redirect from HTTP
+- Rate limiting to prevent abuse
+- Request logging for monitoring
+- Error tracking for debugging
+- Connection pooling for databases
+
+## Next Steps
 
 - [API Reference](https://docs.trivajs.com/core/api)
-- [Request Object](https://docs.trivajs.com/core/request)
-- [Response Object](https://docs.trivajs.com/core/response)
-- [Routing](https://docs.trivajs.com/core/routing)
-- [Configuration](https://docs.trivajs.com/core/configuration)
+- [Routing Details](https://docs.trivajs.com/core/routing)
+- [Middleware Details](https://docs.trivajs.com/core/middleware)
+- [Examples](https://docs.trivajs.com/quick-start/examples)

@@ -1,150 +1,268 @@
 # Routing
 
-Routes are registered on the app instance created by `new build(...)`.
+Define how your application responds to HTTP requests.
 
-## Basic Example
+## Basic Routes
 
 ```javascript
-import { build } from 'triva';
+import { build, get, post, put, del, listen } from 'triva';
 
-const app = new build({ env: 'development' });
+await build({ env: 'development' });
 
-app.get('/api/users', (req, res) => {
-  res.json([{ id: 1, name: 'Alice' }]);
+get('/', (req, res) => {
+  res.send('GET request');
 });
 
-app.post('/api/users', async (req, res) => {
-  const body = await req.json();
-  res.status(201).json({ id: Date.now(), ...body });
+post('/data', (req, res) => {
+  res.json({ received: req.body });
 });
 
-app.listen(3000);
+put('/update', (req, res) => {
+  res.json({ updated: true });
+});
+
+del('/remove', (req, res) => {
+  res.json({ deleted: true });
+});
+
+listen(3000);
 ```
 
-## Supported Methods
+## HTTP Methods
 
-- `app.get()`
-- `app.post()`
-- `app.put()`
-- `app.del()`
-- `app.delete()`
-- `app.patch()`
-- `app.all()`
+Triva supports all standard HTTP methods:
+
+- `get(path, handler)` - GET requests
+- `post(path, handler)` - POST requests
+- `put(path, handler)` - PUT requests
+- `del(path, handler)` - DELETE requests
+- `patch(path, handler)` - PATCH requests
 
 ## Route Parameters
 
+Capture values from the URL:
+
 ```javascript
-app.get('/users/:id', (req, res) => {
-  res.json({ id: req.params.id });
+import { build, get, listen } from 'triva';
+
+await build({ env: 'development' });
+
+get('/users/:id', (req, res) => {
+  const userId = req.params.id;
+  res.json({ userId });
 });
 
-app.get('/teams/:teamId/users/:userId', (req, res) => {
-  res.json(req.params);
+get('/posts/:category/:id', (req, res) => {
+  const { category, id } = req.params;
+  res.json({ category, id });
 });
+
+listen(3000);
+```
+
+Test it:
+
+```bash
+curl http://localhost:3000/users/123
+# Response: {"userId":"123"}
+
+curl http://localhost:3000/posts/tech/456
+# Response: {"category":"tech","id":"456"}
 ```
 
 ## Query Parameters
 
+Access query string values:
+
 ```javascript
-app.get('/search', (req, res) => {
+import { build, get, listen } from 'triva';
+
+await build({ env: 'development' });
+
+get('/search', (req, res) => {
+  const { q, limit, page } = req.query;
   res.json({
-    q: req.query.q || '',
-    page: Number(req.query.page || 1)
+    query: q,
+    limit: limit || 10,
+    page: page || 1
   });
 });
+
+listen(3000);
+```
+
+Test it:
+
+```bash
+curl "http://localhost:3000/search?q=test&limit=20&page=2"
+# Response: {"query":"test","limit":"20","page":"2"}
 ```
 
 ## Multiple Handlers
 
+Chain multiple handlers for a route:
+
 ```javascript
-const requireAuth = (req, res, next) => {
+import { build, get, listen } from 'triva';
+
+await build({ env: 'development' });
+
+const authenticate = (req, res, next) => {
   if (!req.headers.authorization) {
     return res.status(401).json({ error: 'Unauthorized' });
   }
   next();
 };
 
-const loadTenant = (req, res, next) => {
-  req.tenant = req.headers['x-tenant-id'] || 'default';
+const logRequest = (req, res, next) => {
+  console.log(`${req.method} ${req.url}`);
   next();
 };
 
-app.get('/private', requireAuth, loadTenant, (req, res) => {
-  res.json({ tenant: req.tenant });
+get('/protected', authenticate, logRequest, (req, res) => {
+  res.json({ message: 'Protected data' });
 });
+
+listen(3000);
 ```
 
-## Route Builder
+## Route Organization
+
+### Inline Routes
 
 ```javascript
-app.route('/api/books/:id')
-  .get((req, res) => {
-    res.json({ id: req.params.id });
-  })
-  .put(async (req, res) => {
-    const body = await req.json();
-    res.json({ id: req.params.id, updates: body });
-  })
-  .patch(async (req, res) => {
-    const body = await req.json();
-    res.json({ id: req.params.id, patch: body });
-  });
+import { build, get, post, listen } from 'triva';
+
+await build({ env: 'development' });
+
+get('/users', (req, res) => res.json([]));
+post('/users', (req, res) => res.json(req.body));
+
+listen(3000);
 ```
 
-## Match All Methods
+### Separate Handlers
 
 ```javascript
-app.all('/ping', (req, res) => {
-  res.json({ method: req.method, ok: true });
+import { build, get, post, listen } from 'triva';
+
+await build({ env: 'development' });
+
+const getAllUsers = (req, res) => {
+  res.json({ users: [] });
+};
+
+const createUser = (req, res) => {
+  res.json({ created: req.body });
+};
+
+get('/users', getAllUsers);
+post('/users', createUser);
+
+listen(3000);
+```
+
+### Controller Pattern
+
+```javascript
+import { build, get, post, put, del, listen } from 'triva';
+
+await build({ env: 'development' });
+
+const userController = {
+  getAll: (req, res) => res.json({ users: [] }),
+  create: (req, res) => res.json({ created: req.body }),
+  getOne: (req, res) => res.json({ id: req.params.id }),
+  update: (req, res) => res.json({ updated: req.params.id }),
+  delete: (req, res) => res.json({ deleted: req.params.id })
+};
+
+get('/users', userController.getAll);
+post('/users', userController.create);
+get('/users/:id', userController.getOne);
+put('/users/:id', userController.update);
+del('/users/:id', userController.delete);
+
+listen(3000);
+```
+
+## REST API Pattern
+
+Standard RESTful resource routing:
+
+```javascript
+import { build, get, post, put, del, listen } from 'triva';
+
+await build({ env: 'development' });
+
+// GET /api/posts - List all
+get('/api/posts', (req, res) => {
+  res.json({ posts: [] });
 });
+
+// GET /api/posts/:id - Get one
+get('/api/posts/:id', (req, res) => {
+  res.json({ id: req.params.id });
+});
+
+// POST /api/posts - Create
+post('/api/posts', (req, res) => {
+  res.status(201).json({ created: req.body });
+});
+
+// PUT /api/posts/:id - Update
+put('/api/posts/:id', (req, res) => {
+  res.json({ updated: req.params.id, data: req.body });
+});
+
+// DELETE /api/posts/:id - Delete
+del('/api/posts/:id', (req, res) => {
+  res.json({ deleted: req.params.id });
+});
+
+listen(3000);
 ```
 
-## Route Order Matters
+## Route Priority
 
-Define more specific routes before dynamic ones.
+Routes are matched in the order they're defined:
 
 ```javascript
-app.get('/users/admin', (req, res) => {
+import { build, get, listen } from 'triva';
+
+await build({ env: 'development' });
+
+// This matches first
+get('/users/admin', (req, res) => {
   res.json({ role: 'admin' });
 });
 
-app.get('/users/:id', (req, res) => {
-  res.json({ id: req.params.id });
+// This matches if above doesn't
+get('/users/:id', (req, res) => {
+  res.json({ userId: req.params.id });
 });
+
+listen(3000);
 ```
 
-## REST-Style Example
+Request to `/users/admin` will match the first route, not the second.
+
+## Catch-All Routes
+
+Handle 404s or default routes:
 
 ```javascript
-let users = [
-  { id: 1, name: 'Alice' },
-  { id: 2, name: 'Bob' }
-];
+import { build, get, listen } from 'triva';
 
-app.get('/api/users', (req, res) => {
-  res.json(users);
-});
+await build({ env: 'development' });
 
-app.get('/api/users/:id', (req, res) => {
-  const user = users.find((entry) => entry.id === Number(req.params.id));
+// Define your routes first
+get('/', (req, res) => res.send('Home'));
+get('/about', (req, res) => res.send('About'));
 
-  if (!user) {
-    return res.status(404).json({ error: 'User not found' });
-  }
-
-  res.json(user);
-});
-
-app.post('/api/users', async (req, res) => {
-  const body = await req.json();
-  const user = { id: users.length + 1, ...body };
-  users.push(user);
-  res.status(201).json(user);
-});
-```
-
-## Related Docs
+// Catch-all at the end
 
 - [Request Object](https://docs.trivajs.com/core/request)
 - [Response Object](https://docs.trivajs.com/core/response)
-- [API Reference](https://docs.trivajs.com/core/api)
+- [Middleware Guide](https://docs.trivajs.com/core/middleware)
+- [REST API Example](https://docs.trivajs.com/examples/rest-api)

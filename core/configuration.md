@@ -1,214 +1,192 @@
 # Configuration
 
-Configure Triva by passing options into `new build(options)`.
+Configure Triva via the `build()` function options.
 
-## Baseline Example
+## Basic Configuration
 
 ```javascript
-import { build } from 'triva';
+import { build, listen } from 'triva';
 
-const app = new build({
-  env: 'production',
+await build({
+  env: 'development',
+  logging: {
+    enabled: true,
+    level: 'info'
+  },
   cache: {
-    type: 'redis',
-    retention: 300000,
-    database: {
-      url: process.env.REDIS_URL
-    }
-  },
-  throttle: {
-    limit: 1000,
-    window_ms: 60000,
-    burst_limit: 100,
-    ban_threshold: 10,
-    ban_ms: 3600000
-  },
-  retention: {
-    enabled: true,
-    maxEntries: 100000
-  },
-  errorTracking: {
-    enabled: true,
-    maxEntries: 10000
+    type: 'memory'
   }
 });
 
-app.listen(process.env.PORT || 3000);
+listen(3000);
 ```
 
-## `env`
+## Environment
 
 ```javascript
-const app = new build({
-  env: 'development'
+await build({
+  env: 'development'  // 'development' or 'production'
 });
 ```
 
-Accepted values in the current docs are `development` and `production`.
-
-## `protocol` and `ssl`
-
-Use these when Triva itself should create an HTTPS server.
+## Logging Options
 
 ```javascript
+await build({
+  logging: {
+    enabled: true,
+    level: 'info'  // 'debug', 'info', 'warn', 'error'
+  }
+});
+```
+
+## Throttling Options
+
+```javascript
+await build({
+  throttle: {
+    enabled: true,
+    max: 100,           // Max requests
+    window: 60000       // Time window (ms)
+  }
+});
+```
+
+## Cache Options
+
+```javascript
+await build({
+  cache: {
+    type: 'memory',      // 'memory' or 'redis'
+    retention: 3600,     // Default TTL (seconds)
+    url: 'redis://localhost:6379'  // For Redis
+  }
+});
+```
+
+## Database Options
+
+```javascript
+await build({
+  database: {
+    adapter: 'mongodb',
+    url: 'mongodb://localhost:27017/mydb',
+    poolSize: 10
+  }
+});
+```
+
+[Database Adapters](https://docs.trivajs.com/database/adapters)
+
+## HTTPS Options
+
+```javascript
+import { build, listen } from 'triva';
 import { readFileSync } from 'fs';
 
-const app = new build({
-  protocol: 'https',
-  ssl: {
+await build({
+  https: {
+    enabled: true,
     key: readFileSync('./ssl/key.pem'),
     cert: readFileSync('./ssl/cert.pem')
-  }
+  },
+  autoRedirect: true  // HTTP → HTTPS
 });
+
+listen(443);
 ```
 
-## `cache`
+[HTTPS Guide](https://docs.trivajs.com/deployment/https)
 
-The cache block configures the adapter behind the exported `cache` singleton.
+## Environment Variables
 
 ```javascript
-const app = new build({
-  cache: {
-    type: 'mongodb',
-    retention: 600000,
-    limit: 100000,
-    database: {
-      uri: process.env.MONGODB_URI,
-      database: 'triva_cache',
-      collection: 'entries'
-    }
+import { build, listen } from 'triva';
+
+await build({
+  env: process.env.NODE_ENV || 'development',
+  logging: {
+    enabled: process.env.NODE_ENV === 'production',
+    level: process.env.LOG_LEVEL || 'info'
+  },
+  database: {
+    adapter: process.env.DB_ADAPTER,
+    url: process.env.DATABASE_URL
   }
 });
+
+listen(process.env.PORT || 3000);
 ```
 
-Important fields:
-
-- `type`: adapter name such as `memory`, `redis`, `mongodb`, `postgresql`, `mysql`, `sqlite`, `better-sqlite3`, `embedded`, or `supabase`
-- `retention`: default TTL in milliseconds
-- `limit`: max cache size for memory-backed usage
-- `cache_data`: set to `false` to disable caching behavior
-- `database`: adapter-specific connection settings
-
-## `throttle`
-
-Throttle settings are consumed by the built-in throttle middleware. Because throttle counters are stored through the cache layer, configure `cache` alongside `throttle`.
+## Full Example
 
 ```javascript
-const app = new build({
-  cache: { type: 'memory' },
+import { build, listen } from 'triva';
+import { readFileSync } from 'fs';
+
+await build({
+  // Environment
+  env: 'production',
+  
+  // Logging
+  logging: {
+    enabled: true,
+    level: 'info'
+  },
+  
+  // Rate limiting
   throttle: {
-    limit: 100,
-    window_ms: 60000,
-    burst_limit: 20,
-    burst_window_ms: 1000,
-    ban_threshold: 5,
-    ban_ms: 86400000,
-    violation_decay_ms: 3600000,
-    ua_rotation_threshold: 5,
-    namespace: 'throttle'
-  }
-});
-```
-
-## `retention`
-
-Retention config controls how many middleware-related records Triva keeps in memory.
-
-```javascript
-const app = new build({
-  retention: {
     enabled: true,
-    maxEntries: 100000
-  }
-});
-```
-
-## `errorTracking`
-
-```javascript
-const app = new build({
-  errorTracking: {
+    max: 100,
+    window: 60000
+  },
+  
+  // Cache
+  cache: {
+    type: 'redis',
+    url: 'redis://localhost:6379',
+    retention: 3600
+  },
+  
+  // Database
+  database: {
+    adapter: 'mongodb',
+    url: 'mongodb://localhost:27017/myapp'
+  },
+  
+  // HTTPS
+  https: {
     enabled: true,
-    maxEntries: 10000,
-    captureStackTrace: true,
-    captureContext: true,
-    captureSystemInfo: true
-  }
+    key: readFileSync('./ssl/key.pem'),
+    cert: readFileSync('./ssl/cert.pem')
+  },
+  autoRedirect: true,
+  
+  // Error tracking
+  errorTracking: true
 });
+
+listen(443);
 ```
 
-You can also enable it with `errorTracking: true`.
+## Defaults
 
-## `middleware`
-
-`middleware` is an alternative place to provide throttle and retention config.
+Default configuration:
 
 ```javascript
-const app = new build({
-  cache: { type: 'memory' },
-  middleware: {
-    throttle: {
-      limit: 200,
-      window_ms: 60000
-    },
-    retention: {
-      enabled: true,
-      maxEntries: 50000
-    }
-  }
-});
-```
-
-## Adapter Examples
-
-Redis:
-
-```javascript
-cache: {
-  type: 'redis',
-  database: {
-    url: process.env.REDIS_URL || 'redis://localhost:6379'
-  }
+{
+  env: 'development',
+  logging: { enabled: false },
+  throttle: { enabled: false },
+  cache: { type: 'memory', retention: 3600 },
+  https: { enabled: false },
+  autoRedirect: false,
+  errorTracking: false
 }
 ```
 
-MongoDB:
+## Next Steps
 
-```javascript
-cache: {
-  type: 'mongodb',
-  database: {
-    uri: process.env.MONGODB_URI || 'mongodb://localhost:27017',
-    database: 'triva_cache',
-    collection: 'cache_entries'
-  }
-}
-```
-
-SQLite:
-
-```javascript
-cache: {
-  type: 'sqlite',
-  database: {
-    filename: './triva.sqlite'
-  }
-}
-```
-
-## Not Part Of The Current Constructor API
-
-These shapes appear in older docs and examples, but they are not the constructor surface to document now:
-
-- `logging: { ... }`
-- `https: { enabled: true, ... }`
-- `autoRedirect: true`
-- top-level `database: { ... }`
-
-Use `protocol`, `ssl`, and `cache.database` instead.
-
-## Related Docs
-
-- [Core API](https://docs.trivajs.com/core/api)
-- [Database Adapters](https://docs.trivajs.com/database/adapters)
-- [HTTPS Deployment](https://docs.trivajs.com/deployment/https)
+- [Database Configuration](https://docs.trivajs.com/database/overview)
+- [Deployment Guide](https://docs.trivajs.com/deployment/production)
+- [HTTPS Setup](https://docs.trivajs.com/deployment/https)

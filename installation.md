@@ -2,8 +2,15 @@
 
 ## Requirements
 
-- Node.js 18 or newer
-- npm 8 or newer
+- Node.js 18.0.0 or higher
+- npm 8.0.0 or higher
+
+## Verify Node.js
+
+```bash
+node --version
+npm --version
+```
 
 ## Install Triva
 
@@ -11,51 +18,57 @@
 npm install triva
 ```
 
-## Create A Starter App
+## Create Your First App
+
+Create `server.js`:
 
 ```javascript
-import { build } from 'triva';
+import { build, get, listen } from 'triva';
 
-const app = new build({ env: 'development' });
+await build({
+  env: 'development'
+});
 
-app.get('/', (req, res) => {
+get('/', (req, res) => {
   res.json({ status: 'running' });
 });
 
-app.listen(3000);
+listen(3000);
 ```
 
-## Run It
+## Run the Server
 
 ```bash
 node server.js
 ```
 
-## Optional Adapter Packages
+Visit `http://localhost:3000` to see your server running.
 
-Install only the adapters you plan to use:
+## Optional Dependencies
+
+### Database Adapters
+
+Install only the adapters you need:
 
 ```bash
-npm install mongodb
-npm install pg
-npm install mysql2
-npm install redis
-npm install sqlite3
-npm install better-sqlite3
-npm install @supabase/supabase-js
+npm install mongodb          # MongoDB
+npm install pg               # PostgreSQL  
+npm install mysql2           # MySQL
+npm install redis            # Redis
+npm install better-sqlite3   # SQLite
 ```
 
-## Official Extensions
+### Extensions
 
 ```bash
-npm install @trivajs/cors
-npm install @triva/jwt
-npm install -g @trivajs/cli
-npm install @trivajs/shortcuts
+npm install @triva/cors       # CORS middleware
+npm install @triva/jwt        # JWT authentication  
+npm install @triva/cli        # CLI tools
+npm install @triva/shortcuts  # Developer shortcuts
 ```
 
 ## Next Steps
 
-- [Getting Started](https://docs.trivajs.com/getting-started)
 - [First Server Tutorial](https://docs.trivajs.com/quick-start/first-server)
-- [Configuration](https://docs.trivajs.com/core/configuration)
+- [Quick Examples](https://docs.trivajs.com/quick-start/examples)
+- [Configuration Options](https://docs.trivajs.com/core/configuration)

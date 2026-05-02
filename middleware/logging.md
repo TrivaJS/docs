@@ -1,69 +1,295 @@
 # Logging
 
-The current Triva constructor API does not expose a stable `logging` block. If you need request logs today, the recommended pattern is explicit middleware you own.
+Built-in request/response logging with storage and search capabilities.
 
-## Simple Request Logging
+## Basic Setup
+
+Enable logging in `build()`:
 
 ```javascript
-import { build } from 'triva';
+import { build, listen } from 'triva';
 
-const app = new build({ env: 'development' });
+await build({
+  env: 'development',
+  logging: {
+    enabled: true,
+    level: 'info'
+  }
+});
 
-app.use((req, res, next) => {
-  const startedAt = Date.now();
+listen(3000);
+```
 
-  res.on('finish', () => {
-    const duration = Date.now() - startedAt;
-    console.log({
-      method: req.method,
-      url: req.url,
-      statusCode: res.statusCode,
-      duration
-    });
-  });
+## Configuration Options
 
-  next();
+### logging.enabled
+
+Enable/disable logging.
+
+```javascript
+logging: {
+  enabled: true  // or false
+}
+```
+
+### logging.level
+
+Set log level.
+
+```javascript
+logging: {
+  level: 'info'  // 'debug', 'info', 'warn', 'error'
+}
+```
+
+## Log Levels
+
+### debug
+
+Logs everything including debug information.
+
+```javascript
+logging: { level: 'debug' }
+```
+
+### info
+
+Logs informational messages and above.
+
+```javascript
+logging: { level: 'info' }
+```
+
+### warn
+
+Logs warnings and errors only.
+
+```javascript
+logging: { level: 'warn' }
+```
+
+### error
+
+Logs errors only.
+
+```javascript
+logging: { level: 'error' }
+```
+
+## Accessing Logs
+
+Use the `log` export to access stored logs:
+
+```javascript
+import { build, get, log, listen } from 'triva';
+
+await build({
+  env: 'development',
+  logging: {
+    enabled: true,
+    level: 'info'
+  }
+});
+
+get('/logs', async (req, res) => {
+  const logs = await log.get();
+  res.json(logs);
+});
+
+listen(3000);
+```
+
+## Log Methods
+
+### log.get(filter)
+
+Get all logs or filtered logs.
+
+```javascript
+import { log } from 'triva';
+
+// Get all logs
+const allLogs = await log.get();
+
+// Get filtered logs
+const errorLogs = await log.get({ level: 'error' });
+```
+
+### log.search(query)
+
+Search logs by text.
+
+```javascript
+const results = await log.search('error');
+```
+
+### log.getStats()
+
+Get logging statistics.
+
+```javascript
+const stats = await log.getStats();
+// { total: 1000, byLevel: { info: 800, error: 200 } }
+```
+
+### log.clear()
+
+Clear all logs.
+
+```javascript
+await log.clear();
+```
+
+### log.export(filter, filename)
+
+Export logs to file.
+
+```javascript
+await log.export({ level: 'error' }, 'errors.json');
+```
+
+## Log Entry Format
+
+Each log entry contains:
+
+```javascript
+{
+  timestamp: '2026-02-16T12:00:00.000Z',
+  level: 'info',
+  method: 'GET',
+  url: '/api/users',
+  status: 200,
+  duration: 45,  // milliseconds
+  ip: '127.0.0.1'
+}
+```
+
+## Common Use Cases
+
+### View Recent Logs
+
+```javascript
+import { build, get, log, listen } from 'triva';
+
+await build({
+  env: 'development',
+  logging: { enabled: true }
+});
+
+get('/admin/logs', async (req, res) => {
+  const logs = await log.get();
+  res.json(logs.slice(-100));  // Last 100 logs
+});
+
+listen(3000);
+```
+
+### View Error Logs
+
+```javascript
+get('/admin/errors', async (req, res) => {
+  const errors = await log.get({ level: 'error' });
+  res.json(errors);
 });
 ```
 
-## Structured Logging
+### Log Statistics
 
 ```javascript
-app.use((req, res, next) => {
-  const startedAt = Date.now();
-
-  res.on('finish', () => {
-    process.stdout.write(JSON.stringify({
-      timestamp: new Date().toISOString(),
-      method: req.method,
-      url: req.url,
-      statusCode: res.statusCode,
-      duration: Date.now() - startedAt
-    }) + '\\n');
-  });
-
-  next();
+get('/admin/stats', async (req, res) => {
+  const stats = await log.getStats();
+  res.json(stats);
 });
 ```
 
-## Retention And Error Tracking
-
-If you also want in-process visibility for middleware and error data, combine explicit logging with `retention` and `errorTracking`:
+### Search Logs
 
 ```javascript
-const app = new build({
-  retention: {
+get('/admin/search', async (req, res) => {
+  const query = req.query.q;
+  const results = await log.search(query);
+  res.json(results);
+});
+```
+
+## Environment-Specific Logging
+
+### Development
+
+```javascript
+await build({
+  env: 'development',
+  logging: {
     enabled: true,
-    maxEntries: 100000
-  },
-  errorTracking: {
-    enabled: true,
-    maxEntries: 10000
+    level: 'debug'  // Verbose logging
   }
 });
 ```
 
-## Related Docs
+### Production
+
+```javascript
+await build({
+  env: 'production',
+  logging: {
+    enabled: true,
+    level: 'warn'  // Only warnings and errors
+  }
+});
+```
+
+## Complete Example
+
+```javascript
+import { build, get, log, listen } from 'triva';
+
+await build({
+  env: 'production',
+  logging: {
+    enabled: true,
+    level: 'info'
+  }
+});
+
+// API routes
+get('/api/data', (req, res) => {
+  res.json({ data: 'example' });
+});
+
+// Admin log viewer
+get('/admin/logs', async (req, res) => {
+  const logs = await log.get();
+  res.json(logs);
+});
+
+get('/admin/logs/errors', async (req, res) => {
+  const errors = await log.get({ level: 'error' });
+  res.json(errors);
+});
+
+get('/admin/logs/search', async (req, res) => {
+  const results = await log.search(req.query.q);
+  res.json(results);
+});
+
+get('/admin/logs/stats', async (req, res) => {
+  const stats = await log.getStats();
+  res.json(stats);
+});
+
+listen(3000);
+```
+
+## Best Practices
+
+1. **Enable in production** - Essential for debugging
+2. **Set appropriate level** - Use 'warn' or 'error' in production
+3. **Monitor regularly** - Check logs for issues
+4. **Clean up old logs** - Use `log.clear()` periodically
+5. **Secure admin endpoints** - Protect log viewer routes
+
+## Next Steps
 
 - [Error Tracking](https://docs.trivajs.com/middleware/error-tracking)
+- [Throttling](https://docs.trivajs.com/middleware/throttling)
 - [Custom Middleware](https://docs.trivajs.com/middleware/custom)

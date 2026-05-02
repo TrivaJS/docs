@@ -38,14 +38,14 @@ SOFTWARE.
 
 ### What This Means
 
- **You CAN:**
+✅ **You CAN:**
 - Use the Software commercially
 - Modify the Software
 - Distribute the Software
 - Use the Software privately
 - Sublicense the Software
 
- **You CANNOT:**
+❌ **You CANNOT:**
 - Hold the authors liable
 - Expect warranty or guarantees
 - Use trademarks without permission
@@ -85,7 +85,7 @@ You may NOT use Triva for:
 
 ### Copyright
 
-- Original code copyright  2026 Kris Powers
+- Original code copyright © 2026 Kris Powers
 - Contributions retain contributor copyright
 - All contributions licensed under MIT License
 
@@ -263,18 +263,18 @@ Triva builds upon the work of countless open source contributors. Thank you!
 
 ### Contributors
 
-See the [Contributing Guide](https://docs.trivajs.com/policies/contributing) for contributor expectations and project participation details.
+See [CONTRIBUTORS.md](../CONTRIBUTORS.md) for list of contributors.
 
 ---
 
 ## Quick Summary (Not Legal Advice)
 
- Free to use for any legal purpose  
- Modify and redistribute freely  
- Use commercially without fees  
- No warranty or liability  
- Don't use for illegal activities  
- Don't hold us responsible for issues  
+✅ Free to use for any legal purpose  
+✅ Modify and redistribute freely  
+✅ Use commercially without fees  
+❌ No warranty or liability  
+❌ Don't use for illegal activities  
+❌ Don't hold us responsible for issues  
 
 **Read the full terms above for complete legal information.**
 

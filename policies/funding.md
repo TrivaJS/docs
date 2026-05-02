@@ -2,12 +2,12 @@
 
 Triva is an open-source project maintained by dedicated developers. Your support helps us:
 
-*  Build new features
-*  Fix bugs faster
-*  Improve documentation
-*  Enhance security
-*  Innovate continuously
-*  Support the community
+* 🚀 Build new features
+* 🐛 Fix bugs faster
+* 📚 Improve documentation
+* 🔒 Enhance security
+* 💡 Innovate continuously
+* 🌟 Support the community
 
 ## Ways to Support
 
@@ -19,29 +19,29 @@ Support the project through GitHub Sponsors:
 
 **Tiers:**
 
-* **$5/month** - Coffee Supporter 
+* **$5/month** - Coffee Supporter ☕
   * Name in README
   * Sponsor badge
   
-* **$25/month** - Bronze Sponsor 
+* **$25/month** - Bronze Sponsor 🥉
   * Everything above, plus:
   * Name in documentation
   * Priority issue responses (24-48 hours)
   
-* **$100/month** - Silver Sponsor 
+* **$100/month** - Silver Sponsor 🥈
   * Everything above, plus:
   * Company logo in README
   * Monthly development updates
   * Feature request priority
   
-* **$500/month** - Gold Sponsor 
+* **$500/month** - Gold Sponsor 🥇
   * Everything above, plus:
   * Company logo on website
   * Direct access to maintainers
   * Quarterly strategy calls
   * Beta access to new features
   
-* **$1,000/month** - Platinum Sponsor 
+* **$1,000/month** - Platinum Sponsor 💎
   * Everything above, plus:
   * Prominent logo placement
   * Custom feature development (within reason)
@@ -134,19 +134,19 @@ We publish quarterly reports showing:
 
 ## Current Sponsors
 
-### Platinum Sponsors 
+### Platinum Sponsors 💎
 
 *Become our first Platinum Sponsor!*
 
-### Gold Sponsors 
+### Gold Sponsors 🥇
 
 *Become our first Gold Sponsor!*
 
-### Silver Sponsors 
+### Silver Sponsors 🥈
 
 *Become our first Silver Sponsor!*
 
-### Bronze Sponsors 
+### Bronze Sponsors 🥉
 
 *Your name could be here!*
 
@@ -160,15 +160,15 @@ Thank you to all our GitHub Sponsors and individual contributors!
 
 ### Non-Financial Support
 
-*  **Star the repo** on GitHub
-*  **Share on social media** (Twitter, LinkedIn, etc.)
-*  **Write blog posts** about Triva
-*  **Create video tutorials**
-*  **Answer questions** in Discussions
-*  **Report bugs** responsibly
-*  **Improve documentation**
-*  **Design assets** (logos, graphics, etc.)
-*  **Speak at meetups** about Triva
+* ⭐ **Star the repo** on GitHub
+* 🐦 **Share on social media** (Twitter, LinkedIn, etc.)
+* 📝 **Write blog posts** about Triva
+* 🎥 **Create video tutorials**
+* 💬 **Answer questions** in Discussions
+* 🐛 **Report bugs** responsibly
+* 📚 **Improve documentation**
+* 🎨 **Design assets** (logos, graphics, etc.)
+* 🗣️ **Speak at meetups** about Triva
 
 ### Corporate Support Programs
 
@@ -206,30 +206,30 @@ Help us by providing:
 
 ### Funded Goals
 
- **Core Framework** - Community funded  
- **Database Adapters** - Community funded  
+✅ **Core Framework** - Community funded  
+✅ **Database Adapters** - Community funded  
 
 ### Seeking Funding
 
- **Enterprise Features** ($25,000)
+🎯 **Enterprise Features** ($25,000)
 * Advanced monitoring
 * Distributed tracing
 * Performance analytics
 * Multi-region support
 
- **Developer Tools** ($15,000)
+🎯 **Developer Tools** ($15,000)
 * VS Code extension
 * CLI toolkit
 * Code generators
 * Migration tools
 
- **Security Enhancements** ($20,000)
+🎯 **Security Enhancements** ($20,000)
 * Professional security audit
 * Automated vulnerability scanning
 * OWASP compliance
 * Penetration testing
 
- **Documentation Platform** ($10,000)
+🎯 **Documentation Platform** ($10,000)
 * Interactive docs
 * Video tutorials
 * Live examples
@@ -270,7 +270,7 @@ Questions about sponsorship?
 
 ## Thank You!
 
-Every contribution, big or small, helps make Triva better. We're grateful for your support! 
+Every contribution, big or small, helps make Triva better. We're grateful for your support! 🙏
 
 **Your sponsorship directly impacts:**
 
@@ -280,4 +280,4 @@ Every contribution, big or small, helps make Triva better. We're grateful for yo
 * Stronger security
 * Vibrant community
 
-**Together, we're building something amazing!** 
+**Together, we're building something amazing!** 🚀

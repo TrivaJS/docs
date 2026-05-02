@@ -171,11 +171,11 @@ git push origin feature/my-feature
 
 ### Before Submitting
 
- **Tests pass** - All tests must pass  
- **Code formatted** - Run `npm run format`  
- **Linter happy** - Run `npm run lint`  
- **Documentation updated** - If needed  
- **Changelog updated** - For user-facing changes  
+✅ **Tests pass** - All tests must pass  
+✅ **Code formatted** - Run `npm run format`  
+✅ **Linter happy** - Run `npm run lint`  
+✅ **Documentation updated** - If needed  
+✅ **Changelog updated** - For user-facing changes  
 
 ### PR Guidelines
 
@@ -313,18 +313,18 @@ function validate(data) {
 
 ```javascript
 // Don't use var
-var name = 'Triva';  // 
+var name = 'Triva';  // ❌
 
 // Don't use callbacks when async/await works
-db.find((err, data) => {  // 
+db.find((err, data) => {  // ❌
   if (err) throw err;
 });
 
 // Don't use concatenation
-const message = 'Hello, ' + name + '!';  // 
+const message = 'Hello, ' + name + '!';  // ❌
 
 // Don't use function expressions unnecessarily
-const double = function(x) { return x * 2; };  // 
+const double = function(x) { return x * 2; };  // ❌
 ```
 
 ### File Organization
@@ -513,6 +513,6 @@ Don't hesitate to ask! Contact:
 
 ---
 
-**Thank you for contributing to Triva!** 
+**Thank you for contributing to Triva!** 🎉
 
 Every contribution, no matter how small, makes a difference. We appreciate your time and effort in making Triva better for everyone.

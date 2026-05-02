@@ -1,8 +1,8 @@
 # First Server Tutorial
 
-Build a small Triva app from scratch.
+Build your first Triva server step by step.
 
-## Step 1: Create A Project
+## Step 1: Create Project
 
 ```bash
 mkdir my-triva-app
@@ -11,69 +11,155 @@ npm init -y
 npm install triva
 ```
 
-## Step 2: Create `server.js`
+## Step 2: Create Server File
+
+Create `server.js`:
 
 ```javascript
-import { build } from 'triva';
+import { build, get, listen } from 'triva';
 
-const app = new build({ env: 'development' });
-
-app.get('/', (req, res) => {
-  res.json({ message: 'Hello from Triva' });
+await build({
+  env: 'development'
 });
 
-app.listen(3000);
+get('/', (req, res) => {
+  res.json({ message: 'Hello from Triva!' });
+});
+
+listen(3000);
+console.log('Server running on http://localhost:3000');
 ```
 
-## Step 3: Run It
+## Step 3: Run the Server
 
 ```bash
 node server.js
 ```
 
-Then open `http://localhost:3000`.
+Open `http://localhost:3000` and you'll see:
 
-## Step 4: Add A Route Parameter
-
-```javascript
-app.get('/users/:id', (req, res) => {
-  res.json({ id: req.params.id });
-});
+```json
+{
+  "message": "Hello from Triva!"
+}
 ```
 
-## Step 5: Add A JSON POST Route
+## Step 4: Add More Routes
 
 ```javascript
-app.post('/users', async (req, res) => {
-  const body = await req.json();
-  res.status(201).json({ created: body });
+import { build, get, post, listen } from 'triva';
+
+await build({
+  env: 'development'
 });
+
+get('/', (req, res) => {
+  res.json({ message: 'GET request' });
+});
+
+post('/data', (req, res) => {
+  res.json({ message: 'POST request', body: req.body });
+});
+
+get('/users/:id', (req, res) => {
+  res.json({ userId: req.params.id });
+});
+
+listen(3000);
 ```
 
-Try it with curl:
+Test with curl:
 
 ```bash
-curl http://localhost:3000/users/42
-curl -X POST http://localhost:3000/users -H "Content-Type: application/json" -d '{"name":"Alice"}'
+curl http://localhost:3000
+curl -X POST http://localhost:3000/data -H "Content-Type: application/json" -d '{"test":"data"}'
+curl http://localhost:3000/users/123
 ```
 
-## Step 6: Add Cache And Throttle
+## Step 5: Add Configuration
 
 ```javascript
-const app = new build({
+import { build, get, listen } from 'triva';
+
+await build({
+  env: 'development',
+  logging: {
+    enabled: true,
+    level: 'info'
+  },
+  cache: {
+    type: 'memory',
+    retention: 3600
+  }
+});
+
+get('/', (req, res) => {
+  res.json({ message: 'Hello!' });
+});
+
+listen(3000);
+```
+
+## Step 6: Enable Caching
+
+```javascript
+import { build, get, cache, listen } from 'triva';
+
+await build({
   env: 'development',
   cache: {
     type: 'memory',
-    retention: 300000
-  },
-  throttle: {
-    limit: 100,
-    window_ms: 60000
+    retention: 600
+  }
+});
+
+get('/cached', async (req, res) => {
+  const cached = await cache.get('mykey');
+  
+  if (cached) {
+    return res.json({ data: cached, source: 'cache' });
+  }
+  
+  const data = { timestamp: Date.now() };
+  await cache.set('mykey', data, 60);
+  
+  res.json({ data, source: 'fresh' });
+});
+
+listen(3000);
+```
+
+## Common Patterns
+
+### Error Handling
+
+```javascript
+get('/error', (req, res) => {
+  try {
+    throw new Error('Something went wrong');
+  } catch (err) {
+    res.status(500).json({ error: err.message });
   }
 });
 ```
 
-Use a cache backend whenever you enable throttling, because the throttle middleware stores counters through the cache layer.
+### Query Parameters
+
+```javascript
+get('/search', (req, res) => {
+  const { q, limit } = req.query;
+  res.json({ query: q, limit: limit || 10 });
+});
+```
+
+### Headers
+
+```javascript
+get('/headers', (req, res) => {
+  res.header('X-Custom-Header', 'value');
+  res.json({ received: req.headers });
+});
+```
 
 ## Next Steps
 

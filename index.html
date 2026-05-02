@@ -2,36 +2,34 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Triva Docs</title>
+  <title>Docs - Triva (TrivaJS)</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <meta name="description" content="Documentation for the Triva Node.js HTTP and HTTPS framework." />
   <link rel="stylesheet" href="/assets/css/style.css" />
-  <link rel="icon" type="image/jpeg" href="/assets/favicon.jpg" />
+  <link rel="icon" type="image/jpeg" href="/assets/favicon.jpg">
   <script src="https://unpkg.com/lucide@latest"></script>
 </head>
 <body>
-  <button id="sidebarToggle" class="sidebar-toggle" aria-label="Toggle documentation navigation">
-    <i data-lucide="menu"></i>
-  </button>
-  <div id="sidebarOverlay" class="sidebar-overlay"></div>
 
-  <div class="layout">
-    <aside id="sidebar" class="sidebar">
-      <div class="sidebar-logo">
-        <img src="/assets/logo.png" alt="Triva logo" />
-      </div>
-      <div class="sidebar-scroll"></div>
-    </aside>
+<div class="layout">
+  <!-- Left sidebar -->
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-logo">
+      <img src="/assets/logo.png" alt="Triva Logo" />
+    </div>
+    <div class="sidebar-scroll"></div>
+  </aside>
 
-    <main id="content">Loading documentation...</main>
+  <!-- Main content -->
+  <main id="content">Loading…</main>
 
-    <aside id="toc" class="toc">
-      <div class="toc-title"><i data-lucide="text-align-start"></i>On this page</div>
-      <nav class="toc-nav"></nav>
-    </aside>
-  </div>
+  <!-- Right sidebar: "On this page" navigation -->
+  <aside id="toc" class="toc">
+    <div class="toc-title"><i data-lucide="text-align-start"></i>On this page</div>
+    <nav class="toc-nav"></nav>
+  </aside>
+</div>
 
-  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-  <script type="module" src="/assets/js/app.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+<script type="module" src="/assets/js/app.js"></script>
 </body>
 </html>
