@@ -1,35 +1,101 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Docs - Triva (TrivaJS)</title>
+  <title>Triva Docs</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="description" content="Documentation for the Triva Node.js HTTP and HTTPS framework." />
   <link rel="stylesheet" href="/assets/css/style.css" />
-  <link rel="icon" type="image/jpeg" href="/assets/favicon.jpg">
+  <link rel="icon" type="image/jpeg" href="/assets/favicon.jpg" />
   <script src="https://unpkg.com/lucide@latest"></script>
 </head>
 <body>
+  <button id="sidebarToggle" class="sidebar-toggle" aria-label="Toggle documentation navigation">
+    <i data-lucide="menu"></i>
+  </button>
+  <div id="sidebarOverlay" class="sidebar-overlay"></div>
 
-<div class="layout">
-  <!-- Left sidebar -->
-  <aside id="sidebar" class="sidebar">
-    <div class="sidebar-logo">
-      <img src="/assets/logo.png" alt="Triva Logo" />
-    </div>
-    <div class="sidebar-scroll"></div>
-  </aside>
+  <div class="layout">
+    <aside id="sidebar" class="sidebar">
+      <a id="docsHomeLink" href="/" class="sidebar-logo" aria-label="Go to documentation home">
+        <img src="/assets/logo.png" alt="Triva logo" />
+      </a>
+      <div class="sidebar-version">
+        <div class="sidebar-version-label">Version</div>
+        <button
+          id="versionToggle"
+          class="version-toggle"
+          type="button"
+          aria-haspopup="listbox"
+          aria-expanded="false"
+        >
+          <span class="version-toggle-copy">
+            <span id="versionBadge" class="version-badge">v1</span>
+            <span id="versionMeta" class="version-meta">Latest stable</span>
+          </span>
+          <span class="version-toggle-caret" aria-hidden="true"></span>
+        </button>
+        <div id="versionMenu" class="version-menu" hidden></div>
+      </div>
+      <div class="sidebar-scroll"></div>
+    </aside>
 
-  <!-- Main content -->
-  <main id="content">Loading…</main>
+    <main class="docs-main">
+      <div id="content">Loading documentation...</div>
+      <footer class="docs-footer" aria-label="Documentation footer">
+        <div class="footer-content">
+          <div class="footer-links">
+            <a href="/v1/getting-started">
+              <div class="item">Documentation</div>
+            </a>
+            <a href="/v1/benchmarks">
+              <div class="item">Benchmarks</div>
+            </a>
+            <a href="/v1/core/concepts">
+              <div class="item">Guides</div>
+            </a>
+            <a href="/v1/quick-start/examples">
+              <div class="item">Examples</div>
+            </a>
+            <a href="/v1/extensions/overview">
+              <div class="item">Extensions</div>
+            </a>
+            <a href="/v1/deployment/production">
+              <div class="item">Production</div>
+            </a>
+          </div>
+          <div class="footer-links">
+            <a href="/policies/privacy">
+              <div class="item">Privacy Policy</div>
+            </a>
+            <a href="/policies/terms">
+              <div class="item">Terms of Use</div>
+            </a>
+            <a href="/policies/code-of-conduct">
+              <div class="item">Code of Conduct</div>
+            </a>
+            <a href="/policies/security">
+              <div class="item">Security Policy</div>
+            </a>
+            <a href="/v1/issues">
+              <div class="item">Issues</div>
+            </a>
+          </div>
+        </div>
+        <div class="footer-bottom">
+          <p>&copy; 2026 Triva. Apache-2.0 License</p>
+        </div>
+      </footer>
+    </main>
 
-  <!-- Right sidebar: "On this page" navigation -->
-  <aside id="toc" class="toc">
-    <div class="toc-title"><i data-lucide="text-align-start"></i>On this page</div>
-    <nav class="toc-nav"></nav>
-  </aside>
-</div>
+    <aside id="toc" class="toc">
+      <div class="toc-title"><i data-lucide="text-align-start"></i>On this page</div>
+      <nav class="toc-nav"></nav>
+    </aside>
+  </div>
 
-<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-<script type="module" src="/assets/js/app.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <script type="module" src="/assets/js/app.js"></script>
 </body>
 </html>

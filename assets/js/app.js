@@ -1,285 +1,424 @@
-// SVG Icons
 lucide.createIcons();
 
+let DOCS_CONFIG = null;
+let NAVIGATION_BY_VERSION = new Map();
 let SIDEBAR = [];
-let QUICK_LINKS = [];
-let COPYRIGHT = '';
-const manuallyExpandedFolders = new Set();
+let CURRENT_VERSION = null;
+let CURRENT_ROUTE = null;
+let sidebarScrollEl = null;
+let tocObserver = null;
+let versionToggleEl = null;
+let versionMenuEl = null;
+let docsHomeLinkEl = null;
 
-// ═══════════════════════════════════════════════════════════════════════════
-// Configuration Loading
-// ═══════════════════════════════════════════════════════════════════════════
+const COPY_SVG = '<svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" fill="none"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>';
+const CHECK_SVG = '<svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" fill="none"><polyline points="20 6 9 17 4 12"></polyline></svg>';
+const VERSION_STATUS_LABELS = {
+  latest: 'Latest stable',
+  maintenance: 'Maintenance',
+  preview: 'Preview',
+  archived: 'Archived'
+};
+const DEFAULT_VERSIONS_CONFIG = {
+  defaultVersion: 'v1',
+  versions: [
+    {
+      id: 'v1',
+      label: 'v1',
+      description: 'Current stable release',
+      status: 'latest',
+      routePrefix: '/v1',
+      contentRoot: '',
+      navigation: '/assets/data/navigation.json',
+      home: '/getting-started'
+    }
+  ]
+};
+
+function normalizePathname(pathname = '/') {
+  const cleaned = pathname.replace(/\/+$/, '');
+  return cleaned || '/';
+}
+
+function trimSlashes(value = '') {
+  return value.replace(/^\/+|\/+$/g, '');
+}
+
+function normalizeDocPath(pathname = '') {
+  const trimmed = trimSlashes(pathname);
+  return trimmed ? `/${trimmed}` : null;
+}
+
+function getCurrentPath() {
+  return normalizePathname(location.pathname);
+}
+
+function getVersionConfig(versionId) {
+  return DOCS_CONFIG?.versions?.find((version) => version.id === versionId) || null;
+}
+
+function getDefaultVersion() {
+  return getVersionConfig(DOCS_CONFIG?.defaultVersion) || DOCS_CONFIG?.versions?.[0] || null;
+}
+
+function getRoutePrefix(version) {
+  return normalizePathname(version?.routePrefix || `/${version?.id || ''}`);
+}
+
+function getVersionLabel(version) {
+  return version?.label || version?.id || '';
+}
+
+function getVersionStatusLabel(version) {
+  if (!version) return '';
+  return version.statusLabel || VERSION_STATUS_LABELS[version.status] || 'Published';
+}
+
+function getVersionDescription(version) {
+  return version?.description || getVersionStatusLabel(version);
+}
+
+function getVersionHomeDocPath(version) {
+  return normalizeDocPath(version?.home || '/getting-started');
+}
+
+function buildVersionedPath(docPath = null, version = CURRENT_VERSION) {
+  if (!version) return docPath || '/';
+  const prefix = getRoutePrefix(version);
+  const normalizedDocPath = normalizeDocPath(docPath);
+  return normalizedDocPath ? normalizePathname(`${prefix}${normalizedDocPath}`) : prefix;
+}
+
+function getVersionHomeHref(version = CURRENT_VERSION) {
+  return getRoutePrefix(version);
+}
+
+function getVersionStartHref(version = CURRENT_VERSION) {
+  return buildVersionedPath(getVersionHomeDocPath(version), version);
+}
+
+function buildMarkdownPath(docPath = CURRENT_ROUTE?.docPath, version = CURRENT_VERSION) {
+  const normalizedDocPath = normalizeDocPath(docPath);
+  if (!normalizedDocPath || !version) return null;
+
+  const contentRoot = trimSlashes(version.contentRoot || '');
+  const relativeDocPath = trimSlashes(normalizedDocPath);
+  const joined = [contentRoot, relativeDocPath].filter(Boolean).join('/');
+  return `/${joined}.md`;
+}
+
+function getNavigationForVersion(versionId) {
+  return NAVIGATION_BY_VERSION.get(versionId) || [];
+}
+
+function parseLinkedRoute(pathname = '/') {
+  const normalizedPath = normalizePathname(pathname);
+  if (normalizedPath === '/') {
+    return {
+      version: null,
+      versionId: null,
+      docPath: null,
+      pathname: normalizedPath
+    };
+  }
+
+  const segments = trimSlashes(normalizedPath).split('/').filter(Boolean);
+  const explicitVersion = getVersionConfig(segments[0]);
+
+  if (explicitVersion) {
+    return {
+      version: explicitVersion,
+      versionId: explicitVersion.id,
+      docPath: normalizeDocPath(segments.slice(1).join('/')),
+      pathname: normalizedPath
+    };
+  }
+
+  return {
+    version: null,
+    versionId: null,
+    docPath: normalizeDocPath(segments.join('/')),
+    pathname: normalizedPath
+  };
+}
+
+function parseRoute(pathname = getCurrentPath()) {
+  const defaultVersion = getDefaultVersion();
+  const linkedRoute = parseLinkedRoute(pathname);
+
+  if (!defaultVersion) {
+    return {
+      ...linkedRoute,
+      alias: false
+    };
+  }
+
+  if (linkedRoute.version) {
+    return {
+      ...linkedRoute,
+      alias: false
+    };
+  }
+
+  return {
+    version: defaultVersion,
+    versionId: defaultVersion.id,
+    docPath: linkedRoute.docPath,
+    pathname: linkedRoute.pathname,
+    alias: Boolean(linkedRoute.docPath)
+  };
+}
+
+function getCanonicalPath(route = CURRENT_ROUTE) {
+  if (!route?.version) return '/';
+  return route.docPath ? buildVersionedPath(route.docPath, route.version) : getRoutePrefix(route.version);
+}
+
+function shouldCanonicalizeRoute(route = CURRENT_ROUTE) {
+  return Boolean(route?.alias && route?.docPath);
+}
+
+function escapeHtml(text) {
+  return text
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+}
 
 async function loadConfig() {
   try {
-    const [navResponse] = await Promise.all([
-      fetch('/assets/data/navigation.json'),
-    ]);
-    const navData = await navResponse.json();
-    SIDEBAR = navData.navigation;
+    const versionsResponse = await fetch('/assets/data/versions.json');
+    const config = await versionsResponse.json();
+
+    DOCS_CONFIG = {
+      defaultVersion: config.defaultVersion || DEFAULT_VERSIONS_CONFIG.defaultVersion,
+      versions: Array.isArray(config.versions) && config.versions.length
+        ? config.versions
+        : DEFAULT_VERSIONS_CONFIG.versions
+    };
+
+    const navigationEntries = await Promise.all(
+      DOCS_CONFIG.versions.map(async (version) => {
+        const navResponse = await fetch(version.navigation);
+        const navData = await navResponse.json();
+        return [version.id, navData.navigation || []];
+      })
+    );
+
+    NAVIGATION_BY_VERSION = new Map(navigationEntries);
+    CURRENT_ROUTE = parseRoute();
+    CURRENT_VERSION = CURRENT_ROUTE.version || getDefaultVersion();
+    SIDEBAR = getNavigationForVersion(CURRENT_VERSION.id);
     return true;
   } catch (error) {
-    console.error('Failed to load configuration:', error);
+    console.error('Failed to load docs configuration:', error);
     return false;
   }
 }
 
-// ═══════════════════════════════════════════════════════════════════════════
-// SVG Icons
-// ═══════════════════════════════════════════════════════════════════════════
-const ARROW_SVG = '<svg class="arrow" viewBox="0 0 24 24"><path d="M9 18l6-6-6-6" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>';
-const COPY_SVG = '<svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" fill="none"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>';
-const CHECK_SVG = '<svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" fill="none"><polyline points="20 6 9 17 4 12"></polyline></svg>';
-
-// ═══════════════════════════════════════════════════════════════════════════
-// Utility Functions
-// ═══════════════════════════════════════════════════════════════════════════
-
-function getMarkdownPath() {
-  let path = location.pathname.replace(/^\/+|\/+$/g, '');
-  if (!path) return null;
-  return `/${path}.md`;
-}
-
-function escapeHtml(text) {
-  return text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#039;');
-}
-
-// ═══════════════════════════════════════════════════════════════════════════
-// Syntax Highlighting
-// ═══════════════════════════════════════════════════════════════════════════
-
 function highlightJavaScript(code) {
   const tokens = [];
-  const text = code;
   let pos = 0;
 
-  while (pos < text.length) {
+  while (pos < code.length) {
     let matched = false;
 
-    if (text.substr(pos, 2) === '//') {
-      const end = text.indexOf('\n', pos);
-      const comment = end === -1 ? text.substr(pos) : text.substring(pos, end);
+    if (code.substr(pos, 2) === '//') {
+      const end = code.indexOf('\n', pos);
+      const comment = end === -1 ? code.substr(pos) : code.substring(pos, end);
       tokens.push({ type: 'comment', value: comment });
       pos += comment.length;
       matched = true;
-    }
-    else if (text.substr(pos, 2) === '/*') {
-      const end = text.indexOf('*/', pos + 2);
-      const comment = end === -1 ? text.substr(pos) : text.substring(pos, end + 2);
+    } else if (code.substr(pos, 2) === '/*') {
+      const end = code.indexOf('*/', pos + 2);
+      const comment = end === -1 ? code.substr(pos) : code.substring(pos, end + 2);
       tokens.push({ type: 'comment', value: comment });
       pos += comment.length;
       matched = true;
-    }
-    else if (text[pos] === '"' || text[pos] === "'" || text[pos] === '`') {
-      const quote = text[pos];
+    } else if (code[pos] === '"' || code[pos] === "'" || code[pos] === '`') {
+      const quote = code[pos];
       let end = pos + 1;
-      while (end < text.length) {
-        if (text[end] === '\\') { end += 2; continue; }
-        if (text[end] === quote) { end++; break; }
+      while (end < code.length) {
+        if (code[end] === '\\') {
+          end += 2;
+          continue;
+        }
+        if (code[end] === quote) {
+          end++;
+          break;
+        }
         end++;
       }
-      const str = text.substring(pos, end);
-      tokens.push({ type: 'string', value: str });
+      tokens.push({ type: 'string', value: code.substring(pos, end) });
       pos = end;
       matched = true;
-    }
-    else if (/\d/.test(text[pos])) {
+    } else if (/\d/.test(code[pos])) {
       let end = pos;
-      while (end < text.length && /[\d.]/.test(text[end])) end++;
-      tokens.push({ type: 'number', value: text.substring(pos, end) });
+      while (end < code.length && /[\d.]/.test(code[end])) end++;
+      tokens.push({ type: 'number', value: code.substring(pos, end) });
       pos = end;
       matched = true;
-    }
-    else if (/[a-zA-Z_$]/.test(text[pos])) {
+    } else if (/[a-zA-Z_$]/.test(code[pos])) {
       let end = pos;
-      while (end < text.length && /[a-zA-Z0-9_$]/.test(text[end])) end++;
-      const word = text.substring(pos, end);
+      while (end < code.length && /[a-zA-Z0-9_$]/.test(code[end])) end++;
+      const word = code.substring(pos, end);
+      const next = code.slice(end).match(/^\s*/)[0].length + end;
 
       if (/^(const|let|var|function|async|await|return|if|else|for|while|do|switch|case|break|continue|try|catch|finally|throw|new|class|extends|import|export|from|default|static|get|set|typeof|instanceof|delete|void|yield|this|super|in|of)$/.test(word)) {
         tokens.push({ type: 'keyword', value: word });
       } else if (/^(true|false|null|undefined|NaN|Infinity)$/.test(word)) {
         tokens.push({ type: 'boolean', value: word });
+      } else if (code[next] === '(') {
+        tokens.push({ type: 'function', value: word });
       } else {
-        let nextNonSpace = end;
-        while (nextNonSpace < text.length && /\s/.test(text[nextNonSpace])) nextNonSpace++;
-        if (text[nextNonSpace] === '(') {
-          tokens.push({ type: 'function', value: word });
-        } else {
-          tokens.push({ type: 'text', value: word });
-        }
+        tokens.push({ type: 'text', value: word });
       }
+
       pos = end;
       matched = true;
     }
 
     if (!matched) {
-      tokens.push({ type: 'text', value: text[pos] });
+      tokens.push({ type: 'text', value: code[pos] });
       pos++;
     }
   }
 
-  return tokens.map(t => {
-    const escaped = escapeHtml(t.value);
-    if (t.type === 'text') return escaped;
-    return `<span class="token-${t.type}">${escaped}</span>`;
+  return tokens.map((token) => {
+    const value = escapeHtml(token.value);
+    return token.type === 'text' ? value : `<span class="token-${token.type}">${value}</span>`;
   }).join('');
 }
 
 function highlightBash(code) {
   const tokens = [];
-  const text = code;
   let pos = 0;
 
-  while (pos < text.length) {
+  while (pos < code.length) {
     let matched = false;
 
-    if (text[pos] === '#') {
-      const end = text.indexOf('\n', pos);
-      const comment = end === -1 ? text.substr(pos) : text.substring(pos, end);
+    if (code[pos] === '#') {
+      const end = code.indexOf('\n', pos);
+      const comment = end === -1 ? code.substr(pos) : code.substring(pos, end);
       tokens.push({ type: 'comment', value: comment });
       pos += comment.length;
       matched = true;
-    }
-    else if (text[pos] === '"' || text[pos] === "'") {
-      const quote = text[pos];
+    } else if (code[pos] === '"' || code[pos] === "'") {
+      const quote = code[pos];
       let end = pos + 1;
-      while (end < text.length) {
-        if (text[end] === '\\') { end += 2; continue; }
-        if (text[end] === quote) { end++; break; }
+      while (end < code.length) {
+        if (code[end] === '\\') {
+          end += 2;
+          continue;
+        }
+        if (code[end] === quote) {
+          end++;
+          break;
+        }
         end++;
       }
-      tokens.push({ type: 'string', value: text.substring(pos, end) });
+      tokens.push({ type: 'string', value: code.substring(pos, end) });
       pos = end;
       matched = true;
-    }
-    else if (/\d/.test(text[pos])) {
+    } else if (/\d/.test(code[pos])) {
       let end = pos;
-      while (end < text.length && /\d/.test(text[end])) end++;
-      tokens.push({ type: 'number', value: text.substring(pos, end) });
+      while (end < code.length && /\d/.test(code[end])) end++;
+      tokens.push({ type: 'number', value: code.substring(pos, end) });
       pos = end;
       matched = true;
-    }
-    else if (/[a-zA-Z_]/.test(text[pos])) {
+    } else if (/[a-zA-Z_]/.test(code[pos])) {
       let end = pos;
-      while (end < text.length && /[a-zA-Z0-9_-]/.test(text[end])) end++;
-      const word = text.substring(pos, end);
+      while (end < code.length && /[a-zA-Z0-9_-]/.test(code[end])) end++;
+      const word = code.substring(pos, end);
 
-      if (/^(npm|node|git|cd|ls|mkdir|rm|cp|mv|chmod|chown|grep|sed|awk|cat|echo|curl|wget|tar|sudo|apt|brew|if|then|else|fi|for|while|do|done)$/.test(word)) {
+      if (/^(npm|node|git|cd|ls|mkdir|rm|cp|mv|chmod|grep|sed|awk|cat|echo|curl|wget|tar|if|then|else|fi|for|while|do|done)$/.test(word)) {
         tokens.push({ type: 'keyword', value: word });
       } else {
         tokens.push({ type: 'text', value: word });
       }
+
       pos = end;
       matched = true;
-    }
-    else if (text[pos] === '-' && text[pos + 1] === '-') {
+    } else if (code[pos] === '-' && code[pos + 1] === '-') {
       let end = pos + 2;
-      while (end < text.length && /[a-zA-Z0-9-]/.test(text[end])) end++;
-      tokens.push({ type: 'property', value: text.substring(pos, end) });
-      pos = end;
-      matched = true;
-    }
-    else if (text[pos] === '-' && /[a-zA-Z]/.test(text[pos + 1])) {
-      let end = pos + 1;
-      while (end < text.length && /[a-zA-Z0-9]/.test(text[end])) end++;
-      tokens.push({ type: 'property', value: text.substring(pos, end) });
+      while (end < code.length && /[a-zA-Z0-9-]/.test(code[end])) end++;
+      tokens.push({ type: 'property', value: code.substring(pos, end) });
       pos = end;
       matched = true;
     }
 
     if (!matched) {
-      tokens.push({ type: 'text', value: text[pos] });
+      tokens.push({ type: 'text', value: code[pos] });
       pos++;
     }
   }
 
-  return tokens.map(t => {
-    const escaped = escapeHtml(t.value);
-    if (t.type === 'text') return escaped;
-    return `<span class="token-${t.type}">${escaped}</span>`;
+  return tokens.map((token) => {
+    const value = escapeHtml(token.value);
+    return token.type === 'text' ? value : `<span class="token-${token.type}">${value}</span>`;
   }).join('');
 }
 
 function highlightJSON(code) {
   const tokens = [];
-  const text = code;
   let pos = 0;
 
-  while (pos < text.length) {
+  while (pos < code.length) {
     let matched = false;
 
-    if (text[pos] === '"') {
+    if (code[pos] === '"') {
       let end = pos + 1;
-      while (end < text.length) {
-        if (text[end] === '\\') { end += 2; continue; }
-        if (text[end] === '"') { end++; break; }
+      while (end < code.length) {
+        if (code[end] === '\\') {
+          end += 2;
+          continue;
+        }
+        if (code[end] === '"') {
+          end++;
+          break;
+        }
         end++;
       }
-      const str = text.substring(pos, end);
 
-      let nextNonSpace = end;
-      while (nextNonSpace < text.length && /\s/.test(text[nextNonSpace])) nextNonSpace++;
-
-      if (text[nextNonSpace] === ':') {
-        tokens.push({ type: 'property', value: str });
-      } else {
-        tokens.push({ type: 'string', value: str });
-      }
+      const value = code.substring(pos, end);
+      const next = code.slice(end).match(/^\s*/)[0].length + end;
+      tokens.push({ type: code[next] === ':' ? 'property' : 'string', value });
       pos = end;
       matched = true;
-    }
-    else if (/\d/.test(text[pos]) || (text[pos] === '-' && /\d/.test(text[pos + 1]))) {
+    } else if (/\d/.test(code[pos]) || (code[pos] === '-' && /\d/.test(code[pos + 1]))) {
       let end = pos;
-      if (text[end] === '-') end++;
-      while (end < text.length && /[\d.]/.test(text[end])) end++;
-      tokens.push({ type: 'number', value: text.substring(pos, end) });
+      if (code[end] === '-') end++;
+      while (end < code.length && /[\d.]/.test(code[end])) end++;
+      tokens.push({ type: 'number', value: code.substring(pos, end) });
       pos = end;
       matched = true;
-    }
-    else if (/[a-z]/.test(text[pos])) {
+    } else if (/[a-z]/.test(code[pos])) {
       let end = pos;
-      while (end < text.length && /[a-z]/.test(text[end])) end++;
-      const word = text.substring(pos, end);
-      if (/^(true|false|null)$/.test(word)) {
-        tokens.push({ type: 'boolean', value: word });
-      } else {
-        tokens.push({ type: 'text', value: word });
-      }
+      while (end < code.length && /[a-z]/.test(code[end])) end++;
+      const word = code.substring(pos, end);
+      tokens.push({ type: /^(true|false|null)$/.test(word) ? 'boolean' : 'text', value: word });
       pos = end;
       matched = true;
     }
 
     if (!matched) {
-      tokens.push({ type: 'text', value: text[pos] });
+      tokens.push({ type: 'text', value: code[pos] });
       pos++;
     }
   }
 
-  return tokens.map(t => {
-    const escaped = escapeHtml(t.value);
-    if (t.type === 'text') return escaped;
-    return `<span class="token-${t.type}">${escaped}</span>`;
+  return tokens.map((token) => {
+    const value = escapeHtml(token.value);
+    return token.type === 'text' ? value : `<span class="token-${token.type}">${value}</span>`;
   }).join('');
-}
-
-function highlightHTML(code) {
-  return escapeHtml(code);
-}
-
-function highlightCSS(code) {
-  return escapeHtml(code);
-}
-
-function highlightYAML(code) {
-  return escapeHtml(code);
 }
 
 function highlightCode() {
   document.querySelectorAll('pre code').forEach((block) => {
     const language = (block.className.match(/language-(\w+)/) || [])[1] || 'javascript';
     const code = block.textContent;
-    let highlighted;
 
     switch (language.toLowerCase()) {
       case 'javascript':
@@ -287,306 +426,668 @@ function highlightCode() {
       case 'jsx':
       case 'typescript':
       case 'ts':
-        highlighted = highlightJavaScript(code);
+        block.innerHTML = highlightJavaScript(code);
         break;
       case 'bash':
       case 'sh':
       case 'shell':
-        highlighted = highlightBash(code);
+        block.innerHTML = highlightBash(code);
         break;
       case 'json':
-        highlighted = highlightJSON(code);
-        break;
-      case 'html':
-      case 'xml':
-        highlighted = highlightHTML(code);
-        break;
-      case 'css':
-      case 'scss':
-        highlighted = highlightCSS(code);
-        break;
-      case 'yaml':
-      case 'yml':
-        highlighted = highlightYAML(code);
+        block.innerHTML = highlightJSON(code);
         break;
       default:
-        highlighted = escapeHtml(code);
+        block.innerHTML = escapeHtml(code);
     }
-
-    block.innerHTML = highlighted;
   });
 }
 
-// ═══════════════════════════════════════════════════════════════════════════
-// Copy Buttons
-// ═══════════════════════════════════════════════════════════════════════════
-
 function addCopyButtons() {
   document.querySelectorAll('pre').forEach((pre) => {
-    if (pre.querySelector('.copy-button')) return;
+    const code = pre.querySelector('code');
+    if (!code || pre.querySelector('.copy-button')) return;
+
     const button = document.createElement('button');
     button.className = 'copy-button';
     button.innerHTML = COPY_SVG;
     button.title = 'Copy code';
+
     button.addEventListener('click', async () => {
-      const code = pre.querySelector('code').textContent;
       try {
-        await navigator.clipboard.writeText(code);
+        await navigator.clipboard.writeText(code.textContent);
         button.innerHTML = CHECK_SVG;
         button.classList.add('copied');
         setTimeout(() => {
           button.innerHTML = COPY_SVG;
           button.classList.remove('copied');
         }, 2000);
-      } catch (err) {
-        console.error('Failed to copy:', err);
+      } catch (error) {
+        console.error('Failed to copy code:', error);
       }
     });
+
     pre.appendChild(button);
   });
 }
 
-// ═══════════════════════════════════════════════════════════════════════════
-// Table of Contents (Right Sidebar)
-// ═══════════════════════════════════════════════════════════════════════════
+function flattenNavigation(items) {
+  const flat = [];
+
+  function visit(nodes) {
+    nodes.forEach((node) => {
+      if (node.path) flat.push(node);
+      if (node.children) visit(node.children);
+    });
+  }
+
+  visit(items);
+  return flat;
+}
+
+function isPublishedDocPath(docPath, versionId = CURRENT_VERSION?.id) {
+  const normalizedDocPath = normalizeDocPath(docPath);
+  if (!normalizedDocPath || !versionId) return false;
+  return flattenNavigation(getNavigationForVersion(versionId))
+    .some((item) => normalizeDocPath(item.path) === normalizedDocPath);
+}
+
+function resolveVersionSwitchHref(version, docPath = CURRENT_ROUTE?.docPath) {
+  if (docPath && isPublishedDocPath(docPath, version.id)) {
+    return buildVersionedPath(docPath, version);
+  }
+  return getVersionHomeHref(version);
+}
+
+function buildSidebar(items, currentPath) {
+  const list = document.createElement('ul');
+
+  items.forEach((item) => {
+    if (item.children) {
+      const title = document.createElement('li');
+      title.className = 'section-title';
+      title.textContent = item.title;
+      list.appendChild(title);
+
+      item.children.forEach((child) => {
+        const entry = document.createElement('li');
+        const link = document.createElement('a');
+        const childHref = buildVersionedPath(child.path, CURRENT_VERSION);
+        link.href = childHref;
+        link.textContent = child.title;
+        if (childHref === currentPath) link.classList.add('active');
+        entry.appendChild(link);
+        list.appendChild(entry);
+      });
+      return;
+    }
+
+    const entry = document.createElement('li');
+    const link = document.createElement('a');
+    const itemHref = buildVersionedPath(item.path, CURRENT_VERSION);
+    link.href = itemHref;
+    link.textContent = item.title;
+    if (itemHref === currentPath) link.classList.add('active');
+    entry.appendChild(link);
+    list.appendChild(entry);
+  });
+
+  return list;
+}
+
+function rebuildSidebar(currentPath = getCanonicalPath(CURRENT_ROUTE), { resetScroll = false } = {}) {
+  if (!sidebarScrollEl) return;
+  sidebarScrollEl.innerHTML = '';
+  sidebarScrollEl.appendChild(buildSidebar(SIDEBAR, currentPath));
+  if (resetScroll) {
+    sidebarScrollEl.scrollTop = 0;
+  }
+}
+
+function updateSidebarActiveState(currentPath) {
+  document.querySelectorAll('.sidebar-scroll a').forEach((link) => {
+    const href = normalizePathname(new URL(link.href, location.origin).pathname);
+    link.classList.toggle('active', href === currentPath);
+  });
+}
+
+function ensureActiveSidebarItemVisible() {
+  if (!sidebarScrollEl) return;
+
+  const active = sidebarScrollEl.querySelector('a.active');
+  if (!active) return;
+
+  const activeTop = active.offsetTop;
+  const activeBottom = activeTop + active.offsetHeight;
+  const viewportTop = sidebarScrollEl.scrollTop;
+  const viewportBottom = viewportTop + sidebarScrollEl.clientHeight;
+
+  if (activeTop < viewportTop || activeBottom > viewportBottom) {
+    active.scrollIntoView({ block: 'center' });
+  }
+}
+
+function renderHomePage() {
+  const sections = SIDEBAR.map((section) => {
+    const items = (section.children || []).map((child) => `
+      <li><a href="${buildVersionedPath(child.path, CURRENT_VERSION)}">${child.title}</a></li>
+    `).join('');
+
+    return `
+      <section class="doc-section">
+        <h2>${section.title}</h2>
+        <ul>${items}</ul>
+      </section>
+    `;
+  }).join('');
+
+  const versionCards = DOCS_CONFIG.versions.map((version) => `
+    <a class="doc-release-card${version.id === CURRENT_VERSION.id ? ' current' : ''}" href="${resolveVersionSwitchHref(version)}">
+      <span class="doc-release-tag">${escapeHtml(getVersionLabel(version))}</span>
+      <strong>${escapeHtml(getVersionDescription(version))}</strong>
+      <span class="doc-release-state">${escapeHtml(getVersionStatusLabel(version))}</span>
+    </a>
+  `).join('');
+
+  return `
+    <div class="doc-home">
+      <h1>Triva Documentation</h1>
+      <p>Browse release-specific guides, examples, and adapter docs without losing your place.</p>
+      <div class="doc-release-grid">${versionCards}</div>
+      <div class="doc-home-actions">
+        <a href="${getVersionStartHref(CURRENT_VERSION)}">Start with Getting Started</a>
+        <a href="${buildVersionedPath('/quick-start/first-server', CURRENT_VERSION)}">Build Your First Server</a>
+        <a href="${buildVersionedPath('/issues', CURRENT_VERSION)}">Get Support</a>
+      </div>
+      <div class="doc-grid">${sections}</div>
+    </div>
+  `;
+}
+
+function renderNotFound(routePath) {
+  const suggestions = flattenNavigation(SIDEBAR).slice(0, 6).map((item) => `
+    <li><a href="${buildVersionedPath(item.path, CURRENT_VERSION)}">${item.title}</a></li>
+  `).join('');
+
+  return `
+    <div class="doc-home">
+      <h1>Document Not Found</h1>
+      <p>The page <code>${escapeHtml(routePath || '/')}</code> is not published for ${escapeHtml(getVersionLabel(CURRENT_VERSION))}.</p>
+      <h2>Try one of these pages</h2>
+      <ul>${suggestions}</ul>
+    </div>
+  `;
+}
+
+function normalizeContentLinks() {
+  document.querySelectorAll('#content a[href]').forEach((anchor) => {
+    const rawHref = anchor.getAttribute('href');
+    if (!rawHref || rawHref.startsWith('#')) return;
+
+    try {
+      const url = new URL(rawHref, location.origin);
+      const isDocsHost = url.hostname === 'docs.trivajs.com';
+      const isLocalHost = url.origin === location.origin;
+      const isAssetPath = url.pathname.startsWith('/assets/');
+      const isFileAsset = /\.(css|js|json|png|jpg|jpeg|gif|svg|webp|ico|pdf|txt|xml)$/i.test(url.pathname);
+
+      if ((isDocsHost || isLocalHost) && !isAssetPath && !isFileAsset) {
+        const targetRoute = parseLinkedRoute(url.pathname.replace(/\.md$/i, '') || '/');
+        const targetVersion = targetRoute.version || CURRENT_VERSION;
+        const targetHref = targetRoute.docPath
+          ? buildVersionedPath(targetRoute.docPath, targetVersion)
+          : getVersionHomeHref(targetVersion);
+
+        anchor.href = `${targetHref}${url.hash}`;
+        anchor.removeAttribute('target');
+        anchor.removeAttribute('rel');
+      } else if (!isLocalHost) {
+        anchor.target = '_blank';
+        anchor.rel = 'noreferrer';
+      }
+    } catch (error) {
+      console.error('Failed to normalize link:', rawHref, error);
+    }
+  });
+}
+
+function slugify(text) {
+  return text.trim().toLowerCase().replace(/[^\w\s-]/g, '').replace(/\s+/g, '-');
+}
+
+function ensureHeadingIds() {
+  document.querySelectorAll('#content h1, #content h2, #content h3').forEach((heading) => {
+    if (!heading.id) {
+      heading.id = slugify(heading.textContent);
+    }
+  });
+}
+
+function setDocumentTitle() {
+  const title = document.querySelector('#content h1')?.textContent?.trim();
+  const docsLabel = `Triva Docs ${getVersionLabel(CURRENT_VERSION)}`;
+  document.title = title ? `${title} - ${docsLabel}` : docsLabel;
+}
 
 function buildTableOfContents() {
+  const toc = document.querySelector('.toc');
   const tocNav = document.querySelector('.toc-nav');
-  if (!tocNav) return;
+  if (!toc || !tocNav) return;
+
+  if (tocObserver) {
+    tocObserver.disconnect();
+    tocObserver = null;
+  }
 
   tocNav.innerHTML = '';
+  const headings = Array.from(document.querySelectorAll('#content h2, #content h3'));
 
-  // Extract h1 and h2 headings from the content
-  const headings = document.querySelectorAll('#content h2');
-
-  if (headings.length === 0) {
-    document.querySelector('.toc').style.display = 'none';
+  if (!headings.length) {
+    toc.style.display = 'none';
     return;
   }
 
-  document.querySelector('.toc').style.display = 'block';
+  toc.style.display = 'block';
 
-  headings.forEach(heading => {
-    const level = heading.tagName.toLowerCase() === 'h2' ? '2' : '3';
-    const text = heading.textContent.trim();
-    const id = heading.id || text.toLowerCase().replace(/[^\w\s-]/g, '').replace(/\s+/g, '-');
-
-    if (!heading.id) heading.id = id;
-
+  headings.forEach((heading) => {
     const link = document.createElement('a');
-    link.href = `#${id}`;
-    link.textContent = text;
-    link.setAttribute('data-level', level);
-    link.addEventListener('click', (e) => {
-      e.preventDefault();
+    link.href = `#${heading.id}`;
+    link.textContent = heading.textContent.trim();
+    link.dataset.level = heading.tagName.toLowerCase() === 'h3' ? '3' : '2';
+    link.addEventListener('click', (event) => {
+      event.preventDefault();
       heading.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      history.pushState(null, '', `#${id}`);
+      history.replaceState({
+        ...(history.state || {}),
+        scrollY: window.scrollY,
+        sidebarScrollTop: sidebarScrollEl?.scrollTop || 0
+      }, '', `${location.pathname}${location.search}#${heading.id}`);
     });
-
     tocNav.appendChild(link);
   });
 
-  // Scroll spy: highlight active section
   setupScrollSpy();
 }
 
 function setupScrollSpy() {
-  const tocLinks = document.querySelectorAll('.toc-nav a');
-  if (tocLinks.length === 0) return;
+  const links = document.querySelectorAll('.toc-nav a');
+  if (!links.length) return;
 
-  const observer = new IntersectionObserver(
-    (entries) => {
-      entries.forEach(entry => {
-        if (entry.isIntersecting) {
-          const id = entry.target.id;
-          tocLinks.forEach(link => {
-            if (link.getAttribute('href') === `#${id}`) {
-              link.classList.add('active');
-            } else {
-              link.classList.remove('active');
-            }
-          });
-        }
+  tocObserver = new IntersectionObserver((entries) => {
+    entries.forEach((entry) => {
+      if (!entry.isIntersecting) return;
+      const id = entry.target.id;
+      links.forEach((link) => {
+        link.classList.toggle('active', link.getAttribute('href') === `#${id}`);
       });
-    },
-    { rootMargin: '-100px 0px -66%' }
-  );
+    });
+  }, { rootMargin: '-100px 0px -66%' });
 
-  document.querySelectorAll('#content h2').forEach(heading => {
-    observer.observe(heading);
+  document.querySelectorAll('#content h2, #content h3').forEach((heading) => {
+    tocObserver.observe(heading);
   });
 }
 
-// ═══════════════════════════════════════════════════════════════════════════
-// Markdown Loading
-// ═══════════════════════════════════════════════════════════════════════════
+function getPrevNext(currentDocPath = CURRENT_ROUTE?.docPath) {
+  const flat = flattenNavigation(SIDEBAR);
+  const normalizedDocPath = normalizeDocPath(currentDocPath);
+  const index = flat.findIndex((item) => normalizeDocPath(item.path) === normalizedDocPath);
 
-async function loadMarkdown() {
+  return {
+    prev: index > 0 ? flat[index - 1] : null,
+    next: index !== -1 && index < flat.length - 1 ? flat[index + 1] : null
+  };
+}
+
+function addPrevNextNavigation() {
+  if (!CURRENT_ROUTE?.docPath) return;
+
   const content = document.getElementById('content');
-  const mdPath = getMarkdownPath();
+  if (!content) return;
 
-  if (!mdPath) {
-    content.innerHTML = '<h1>Welcome to Triva Documentation</h1><p>Select a document from the sidebar.</p>';
+  const { prev, next } = getPrevNext(CURRENT_ROUTE.docPath);
+  if (!prev && !next) return;
+
+  const nav = document.createElement('div');
+  nav.className = 'page-navigation';
+
+  const prevButton = document.createElement('a');
+  prevButton.className = prev ? 'nav-button prev' : 'nav-button prev disabled';
+  prevButton.href = prev ? buildVersionedPath(prev.path, CURRENT_VERSION) : '#';
+  prevButton.innerHTML = `
+    <div class="nav-label">Previous Page</div>
+    <div class="nav-title">${prev ? prev.title : 'No previous page'}</div>
+  `;
+
+  const nextButton = document.createElement('a');
+  nextButton.className = next ? 'nav-button next' : 'nav-button next disabled';
+  nextButton.href = next ? buildVersionedPath(next.path, CURRENT_VERSION) : '#';
+  nextButton.innerHTML = `
+    <div class="nav-label">Next Page</div>
+    <div class="nav-title">${next ? next.title : 'No next page'}</div>
+  `;
+
+  nav.appendChild(prevButton);
+  nav.appendChild(nextButton);
+  content.appendChild(nav);
+}
+
+function initMobileSidebar() {
+  const toggle = document.getElementById('sidebarToggle');
+  const overlay = document.getElementById('sidebarOverlay');
+  const sidebar = document.getElementById('sidebar');
+  if (!toggle || !overlay || !sidebar) return;
+
+  const close = () => {
+    sidebar.classList.remove('open');
+    overlay.classList.remove('open');
+    document.body.classList.remove('sidebar-open');
+  };
+
+  const open = () => {
+    sidebar.classList.add('open');
+    overlay.classList.add('open');
+    document.body.classList.add('sidebar-open');
+  };
+
+  toggle.addEventListener('click', () => {
+    if (sidebar.classList.contains('open')) {
+      close();
+    } else {
+      open();
+    }
+  });
+
+  overlay.addEventListener('click', close);
+  sidebar.addEventListener('click', (event) => {
+    if (event.target.closest('a[href]')) {
+      close();
+    }
+  });
+}
+
+function initVersionSwitcher() {
+  versionToggleEl = document.getElementById('versionToggle');
+  versionMenuEl = document.getElementById('versionMenu');
+  docsHomeLinkEl = document.getElementById('docsHomeLink');
+
+  if (!versionToggleEl || !versionMenuEl) return;
+
+  const closeMenu = () => {
+    versionMenuEl.hidden = true;
+    versionToggleEl.setAttribute('aria-expanded', 'false');
+  };
+
+  versionToggleEl.addEventListener('click', (event) => {
+    event.stopPropagation();
+    const willOpen = versionMenuEl.hidden;
+    versionMenuEl.hidden = !willOpen;
+    versionToggleEl.setAttribute('aria-expanded', willOpen ? 'true' : 'false');
+  });
+
+  document.addEventListener('click', (event) => {
+    if (versionMenuEl.hidden) return;
+    if (versionMenuEl.contains(event.target) || versionToggleEl.contains(event.target)) return;
+    closeMenu();
+  });
+
+  document.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape') {
+      closeMenu();
+    }
+  });
+}
+
+function renderVersionSwitcher() {
+  if (!versionToggleEl || !versionMenuEl || !CURRENT_VERSION) return;
+
+  const badge = document.getElementById('versionBadge');
+  const meta = document.getElementById('versionMeta');
+
+  if (badge) badge.textContent = getVersionLabel(CURRENT_VERSION);
+  if (meta) meta.textContent = getVersionStatusLabel(CURRENT_VERSION);
+
+  const versionItems = DOCS_CONFIG.versions.map((version) => {
+    const href = resolveVersionSwitchHref(version);
+    const isCurrent = version.id === CURRENT_VERSION.id;
+
+    return `
+      <a class="version-option${isCurrent ? ' current' : ''}" href="${href}">
+        <span class="version-option-copy">
+          <span class="version-option-title">${escapeHtml(getVersionLabel(version))}</span>
+          <span class="version-option-subtitle">${escapeHtml(getVersionDescription(version))}</span>
+        </span>
+        <span class="version-option-indicator">${isCurrent ? 'Current' : getVersionStatusLabel(version)}</span>
+      </a>
+    `;
+  }).join('');
+
+  const emptyState = DOCS_CONFIG.versions.length < 2
+    ? '<div class="version-empty">More releases will appear here.</div>'
+    : '';
+
+  versionMenuEl.innerHTML = `${versionItems}${emptyState}`;
+  versionMenuEl.hidden = true;
+  versionToggleEl.setAttribute('aria-expanded', 'false');
+
+  if (docsHomeLinkEl) {
+    docsHomeLinkEl.href = getVersionHomeHref(CURRENT_VERSION);
+    docsHomeLinkEl.setAttribute('aria-label', `Go to ${getVersionLabel(CURRENT_VERSION)} documentation home`);
+  }
+}
+
+function scrollToHash() {
+  if (!location.hash) return false;
+  const target = document.getElementById(decodeURIComponent(location.hash.slice(1)));
+  if (!target) return false;
+
+  setTimeout(() => {
+    target.scrollIntoView({ block: 'start' });
+  }, 0);
+
+  return true;
+}
+
+function applyScrollState(mode = 'preserve', historyState = null) {
+  if (scrollToHash()) return;
+
+  if (mode === 'history' && historyState && typeof historyState.scrollY === 'number') {
+    window.scrollTo({ top: historyState.scrollY, left: 0 });
+    return;
+  }
+
+  if (mode === 'top') {
+    window.scrollTo({ top: 0, left: 0 });
+  }
+}
+
+function saveViewState() {
+  const currentState = history.state || {};
+  history.replaceState({
+    ...currentState,
+    scrollY: window.scrollY,
+    sidebarScrollTop: sidebarScrollEl?.scrollTop || 0
+  }, '', location.href);
+}
+
+function restoreSidebarState(historyState = null) {
+  if (!sidebarScrollEl || !historyState || typeof historyState.sidebarScrollTop !== 'number') return;
+  sidebarScrollEl.scrollTop = historyState.sidebarScrollTop;
+}
+
+function isClientNavigationLink(anchor) {
+  const rawHref = anchor.getAttribute('href');
+  if (!rawHref || rawHref.startsWith('#')) return false;
+  if (anchor.target && anchor.target !== '_self') return false;
+  if (anchor.hasAttribute('download')) return false;
+
+  let url;
+  try {
+    url = new URL(anchor.href, location.origin);
+  } catch (error) {
+    return false;
+  }
+
+  if (!/^https?:$/.test(url.protocol)) return false;
+  if (url.origin !== location.origin) return false;
+  if (url.pathname.startsWith('/assets/')) return false;
+  if (/\.(css|js|json|png|jpg|jpeg|gif|svg|webp|ico|pdf|txt|xml)$/i.test(url.pathname)) return false;
+
+  return true;
+}
+
+function syncRouteState({ forceSidebarRebuild = false } = {}) {
+  const previousVersionId = CURRENT_VERSION?.id;
+  CURRENT_ROUTE = parseRoute();
+
+  if (shouldCanonicalizeRoute(CURRENT_ROUTE)) {
+    history.replaceState({
+      ...(history.state || {}),
+      scrollY: window.scrollY,
+      sidebarScrollTop: sidebarScrollEl?.scrollTop || 0
+    }, '', `${getCanonicalPath(CURRENT_ROUTE)}${location.search}${location.hash}`);
+    CURRENT_ROUTE = parseRoute();
+  }
+
+  CURRENT_VERSION = CURRENT_ROUTE.version || getDefaultVersion() || DOCS_CONFIG?.versions?.[0] || DEFAULT_VERSIONS_CONFIG.versions[0];
+  SIDEBAR = getNavigationForVersion(CURRENT_VERSION?.id);
+  renderVersionSwitcher();
+
+  const currentPath = getCanonicalPath(CURRENT_ROUTE);
+  const shouldRebuildSidebar = forceSidebarRebuild || previousVersionId !== CURRENT_VERSION?.id || !sidebarScrollEl?.querySelector('ul');
+
+  if (shouldRebuildSidebar) {
+    rebuildSidebar(currentPath, { resetScroll: previousVersionId !== CURRENT_VERSION?.id });
+  } else {
+    updateSidebarActiveState(currentPath);
+  }
+}
+
+async function navigateTo(url, { replace = false } = {}) {
+  const target = typeof url === 'string' ? new URL(url, location.origin) : url;
+  const nextPath = normalizePathname(target.pathname);
+  const nextHref = `${target.pathname || '/'}${target.search}${target.hash}`;
+  const currentPath = getCurrentPath();
+  const historyMethod = replace ? 'replaceState' : 'pushState';
+
+  saveViewState();
+
+  if (nextPath === currentPath) {
+    history[historyMethod]({
+      scrollY: 0,
+      sidebarScrollTop: sidebarScrollEl?.scrollTop || 0
+    }, '', nextHref);
+    applyScrollState(target.hash ? 'preserve' : 'top');
+    return;
+  }
+
+  history[historyMethod]({
+    scrollY: 0,
+    sidebarScrollTop: sidebarScrollEl?.scrollTop || 0
+  }, '', nextHref);
+
+  await loadMarkdown({ scrollMode: 'top' });
+}
+
+function initClientNavigation() {
+  document.addEventListener('click', async (event) => {
+    const anchor = event.target.closest('a[href]');
+    if (!anchor) return;
+    if (event.defaultPrevented || event.button !== 0) return;
+    if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+    if (!isClientNavigationLink(anchor)) return;
+
+    event.preventDefault();
+    await navigateTo(new URL(anchor.href, location.origin));
+  });
+
+  window.addEventListener('popstate', async (event) => {
+    await loadMarkdown({ scrollMode: 'history', historyState: event.state });
+  });
+}
+
+async function loadMarkdown({ scrollMode = 'preserve', historyState = null } = {}) {
+  const content = document.getElementById('content');
+  if (!content) return;
+
+  syncRouteState();
+
+  if (!CURRENT_ROUTE?.docPath) {
+    content.innerHTML = renderHomePage();
+    normalizeContentLinks();
     buildTableOfContents();
+    setDocumentTitle();
+    restoreSidebarState(historyState);
+    applyScrollState(scrollMode, historyState);
+    return;
+  }
+
+  if (!isPublishedDocPath(CURRENT_ROUTE.docPath, CURRENT_VERSION.id)) {
+    content.innerHTML = renderNotFound(getCanonicalPath(CURRENT_ROUTE));
+    normalizeContentLinks();
+    buildTableOfContents();
+    setDocumentTitle();
+    restoreSidebarState(historyState);
+    applyScrollState(scrollMode, historyState);
     return;
   }
 
   try {
-    const res = await fetch(mdPath);
-    if (!res.ok) throw new Error(`404: ${mdPath}`);
-    const md = await res.text();
+    const mdPath = buildMarkdownPath(CURRENT_ROUTE.docPath, CURRENT_VERSION);
+    const response = await fetch(mdPath);
+    if (!response.ok) throw new Error(`404: ${mdPath}`);
+    const markdown = await response.text();
 
-    content.innerHTML = marked.parse(md, {
+    content.innerHTML = marked.parse(markdown, {
       gfm: true,
       breaks: false,
       headerIds: true,
       mangle: false
     });
 
-    // Ensure all headings have IDs for TOC linking
-    document.querySelectorAll('#content h1, #content h2, #content h3').forEach(h => {
-      if (!h.id) {
-        h.id = h.textContent.trim().toLowerCase().replace(/[^\w\s-]/g, '').replace(/\s+/g, '-');
-      }
-    });
-
+    ensureHeadingIds();
+    normalizeContentLinks();
     highlightCode();
     addCopyButtons();
-    buildTableOfContents();
     addPrevNextNavigation();
-
-  } catch (err) {
-    console.error(err);
-    content.innerHTML = '<h1>404</h1><p>Document not found.</p>';
     buildTableOfContents();
+    setDocumentTitle();
+    restoreSidebarState(historyState);
+    applyScrollState(scrollMode, historyState);
+  } catch (error) {
+    console.error(error);
+    content.innerHTML = renderNotFound(getCanonicalPath(CURRENT_ROUTE));
+    normalizeContentLinks();
+    buildTableOfContents();
+    setDocumentTitle();
+    restoreSidebarState(historyState);
+    applyScrollState(scrollMode, historyState);
   }
 }
-
-// ═══════════════════════════════════════════════════════════════════════════
-// Sidebar Navigation
-// ═══════════════════════════════════════════════════════════════════════════
-
-function hasActiveChild(item, currentPath) {
-  if (item.path === currentPath) return true;
-  if (!item.children) return false;
-  return item.children.some(child => hasActiveChild(child, currentPath));
-}
-
-function getFolderId(item, parentPath = '') {
-  return `${parentPath}/${item.title}`.replace(/\s+/g, '-').toLowerCase();
-}
-
-function buildSidebar(items, currentPath, parentPath = '') {
-  const ul = document.createElement('ul');
-
-  items.forEach(item => {
-    if (item.children) {
-      // Section title (not clickable, always visible)
-      const titleLi = document.createElement('li');
-      titleLi.className = 'section-title';
-      titleLi.textContent = item.title;
-      ul.appendChild(titleLi);
-
-      // Children (always visible, no collapsing)
-      item.children.forEach(child => {
-        const li = document.createElement('li');
-        const link = document.createElement('a');
-        link.href = child.path;
-        link.textContent = child.title;
-        if (child.path === currentPath) link.classList.add('active');
-        li.appendChild(link);
-        ul.appendChild(li);
-      });
-    } else {
-      // Top-level link
-      const li = document.createElement('li');
-      const link = document.createElement('a');
-      link.href = item.path;
-      link.textContent = item.title;
-      if (item.path === currentPath) link.classList.add('active');
-      li.appendChild(link);
-      ul.appendChild(li);
-    }
-  });
-
-  return ul;
-}
-
-// ═══════════════════════════════════════════════════════════════════════════
-// Initialization
-// ═══════════════════════════════════════════════════════════════════════════
 
 async function init() {
-  const configLoaded = await loadConfig();
-  if (!configLoaded) return;
+  const loaded = await loadConfig();
+  if (!loaded) return;
 
-  const sidebarScroll = document.querySelector('.sidebar-scroll');
-  const sidebar = document.getElementById('sidebar');
-  const currentPath = location.pathname.replace(/\/$/, '');
+  sidebarScrollEl = document.querySelector('.sidebar-scroll');
+  if (!sidebarScrollEl) return;
 
-  if (!sidebarScroll || !sidebar) return;
+  initVersionSwitcher();
+  syncRouteState({ forceSidebarRebuild: true });
+  initMobileSidebar();
+  initClientNavigation();
 
-  sidebarScroll.appendChild(buildSidebar(SIDEBAR, currentPath));
+  if (history.scrollRestoration) {
+    history.scrollRestoration = 'manual';
+  }
 
   await loadMarkdown();
+  ensureActiveSidebarItemVisible();
 
-  // Scroll active item into view
-  const active = document.querySelector('.sidebar a.active');
-  if (active && sidebarScroll) {
-    setTimeout(() => {
-      sidebarScroll.scrollTop = active.offsetTop - sidebarScroll.offsetHeight / 2;
-    }, 100);
-  }
+  history.replaceState({
+    ...(history.state || {}),
+    scrollY: window.scrollY,
+    sidebarScrollTop: sidebarScrollEl.scrollTop
+  }, '', location.href);
 }
 
 init();
-
-// Add GitHub SVG
-const GITHUB_SVG = '<svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M12 2C6.477 2 2 6.477 2 12c0 4.42 2.865 8.17 6.839 9.49.5.092.682-.217.682-.482 0-.237-.008-.866-.013-1.7-2.782.603-3.369-1.34-3.369-1.34-.454-1.156-1.11-1.463-1.11-1.463-.908-.62.069-.608.069-.608 1.003.07 1.531 1.03 1.531 1.03.892 1.529 2.341 1.087 2.91.831.092-.646.35-1.086.636-1.336-2.22-.253-4.555-1.11-4.555-4.943 0-1.091.39-1.984 1.029-2.683-.103-.253-.446-1.27.098-2.647 0 0 .84-.269 2.75 1.025A9.578 9.578 0 0112 6.836c.85.004 1.705.114 2.504.336 1.909-1.294 2.747-1.025 2.747-1.025.546 1.377.203 2.394.1 2.647.64.699 1.028 1.592 1.028 2.683 0 3.842-2.339 4.687-4.566 4.935.359.309.678.919.678 1.852 0 1.336-.012 2.415-.012 2.743 0 .267.18.578.688.48C19.138 20.167 22 16.418 22 12c0-5.523-4.477-10-10-10z"/></svg>';
-
-// Flatten navigation for prev/next
-function flattenNavigation(items) {
-  const flat = [];
-  function traverse(items) {
-    items.forEach(item => {
-      if (item.path) flat.push(item);
-      if (item.children) traverse(item.children);
-    });
-  }
-  traverse(items);
-  return flat;
-}
-
-function getPrevNext(currentPath) {
-  const flat = flattenNavigation(SIDEBAR);
-  const currentIndex = flat.findIndex(item => item.path === currentPath);
-  return {
-    prev: currentIndex > 0 ? flat[currentIndex - 1] : null,
-    next: currentIndex < flat.length - 1 ? flat[currentIndex + 1] : null
-  };
-}
-
-function addPrevNextNavigation() {
-  const currentPath = location.pathname.replace(/\/$/, '');
-  const { prev, next } = getPrevNext(currentPath);
-  const navContainer = document.createElement('div');
-  navContainer.className = 'page-navigation';
-  const prevButton = document.createElement('a');
-  prevButton.className = prev ? 'nav-button prev' : 'nav-button prev disabled';
-  if (prev) prevButton.href = prev.path;
-  prevButton.innerHTML = `
-    <div class="nav-label">Previous Page</div>
-    <div class="nav-title">${prev ? prev.title : 'No previous page'}</div>
-  `;
-  const nextButton = document.createElement('a');
-  nextButton.className = next ? 'nav-button next' : 'nav-button next disabled';
-  if (next) nextButton.href = next.path;
-  nextButton.innerHTML = `
-    <div class="nav-label">Next Page</div>
-    <div class="nav-title">${next ? next.title : 'No next page'}</div>
-  `;
-  navContainer.appendChild(prevButton);
-  navContainer.appendChild(nextButton);
-  const content = document.getElementById('content');
-  content.appendChild(navContainer);
-}
