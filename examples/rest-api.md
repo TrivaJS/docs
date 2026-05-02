@@ -1,8 +1,4 @@
-# First Server
-
-This is the shortest path from install to a working Triva app.
-
-## Basic Example
+# REST API
 
 ```javascript
 import { build } from 'triva';
@@ -22,7 +18,6 @@ app.get('/api/users/:id', (req, res) => {
   if (!user) {
     return res.status(404).json({ error: 'User not found' });
   }
-
   res.json(user);
 });
 
@@ -33,19 +28,12 @@ app.post('/api/users', async (req, res) => {
   res.status(201).json(user);
 });
 
-app.listen(3000);
+app.put('/api/users/:id', async (req, res) => {
+  const body = await req.json();
+  res.json({ id: req.params.id, updated: body });
+});
+
+app.del('/api/users/:id', (req, res) => {
+  res.json({ deleted: req.params.id });
+});
 ```
-
-## What This Shows
-
-- route registration on the app instance
-- path parameters through `req.params`
-- JSON body parsing through `await req.json()`
-- status codes through `res.status()`
-
-## Next Steps
-
-- [Quick Start Examples](/quick-start/examples)
-- [Routing](/core/routing)
-- [Request](/core/request)
-- [Response](/core/response)

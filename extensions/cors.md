@@ -1,6 +1,8 @@
-# CORS
+# CORS Extension
 
-Triva ships CORS as an official extension package.
+## Package
+
+`@trivajs/cors`
 
 ## Install
 
@@ -8,7 +10,7 @@ Triva ships CORS as an official extension package.
 npm install @trivajs/cors
 ```
 
-## Basic Usage
+## Example
 
 ```javascript
 import { build } from 'triva';
@@ -16,16 +18,6 @@ import { cors } from '@trivajs/cors';
 
 const app = new build({ env: 'development' });
 
-app.use(cors());
-
-app.get('/api/data', (req, res) => {
-  res.json({ ok: true });
-});
-```
-
-## Restricted Origin
-
-```javascript
 app.use(cors({
   origin: 'https://app.example.com',
   credentials: true,
@@ -33,10 +25,11 @@ app.use(cors({
 }));
 ```
 
-## Route-Level Usage
+## Presets
 
-```javascript
-app.get('/api/public', cors(), (req, res) => {
-  res.json({ public: true });
-});
-```
+The package also exposes:
+
+- `corsDevMode()`
+- `corsStrict(origin)`
+- `corsMultiOrigin(origins)`
+- `corsDynamic(validator)`

@@ -2,73 +2,75 @@
 
 ## Requirements
 
-- Node.js 18.0.0 or higher
-- npm 8.0.0 or higher
+- Node.js 18 or newer
+- npm, pnpm, or yarn
 
-## Verify Node.js
-
-```bash
-node --version
-npm --version
-```
-
-## Install Triva
+## Framework Install
 
 ```bash
 npm install triva
 ```
 
-## Create Your First App
-
-Create `server.js`:
+## Minimal Smoke Test
 
 ```javascript
-import { build, get, listen } from 'triva';
+import { build } from 'triva';
 
-await build({
-  env: 'development'
+const app = new build({ env: 'development' });
+
+app.get('/', (req, res) => {
+  res.send('Triva is installed');
 });
 
-get('/', (req, res) => {
-  res.json({ status: 'running' });
+app.listen(3000);
+```
+
+Run the file and open `http://localhost:3000`.
+
+## Optional Extension Packages
+
+Install only the packages you need:
+
+```bash
+npm install @trivajs/cors
+npm install @triva/jwt
+npm install @trivajs/cli
+npm install @trivajs/shortcuts
+```
+
+## Optional Adapter Drivers
+
+Some cache adapters need their own driver package in your app:
+
+- Redis
+- MongoDB
+- PostgreSQL
+- MySQL
+- SQLite
+- Better-SQLite3
+- Supabase
+
+Start with the [adapter overview](/database/adapters) before wiring one into `cache`.
+
+## HTTPS Note
+
+If you run Triva with `protocol: 'https'`, provide `ssl.key` and `ssl.cert`:
+
+```javascript
+import fs from 'fs';
+import { build } from 'triva';
+
+const app = new build({
+  protocol: 'https',
+  ssl: {
+    key: fs.readFileSync('./certs/localhost-key.pem'),
+    cert: fs.readFileSync('./certs/localhost-cert.pem')
+  }
 });
-
-listen(3000);
 ```
 
-## Run the Server
+## Read Next
 
-```bash
-node server.js
-```
-
-Visit `http://localhost:3000` to see your server running.
-
-## Optional Dependencies
-
-### Database Adapters
-
-Install only the adapters you need:
-
-```bash
-npm install mongodb          # MongoDB
-npm install pg               # PostgreSQL  
-npm install mysql2           # MySQL
-npm install redis            # Redis
-npm install better-sqlite3   # SQLite
-```
-
-### Extensions
-
-```bash
-npm install @triva/cors       # CORS middleware
-npm install @triva/jwt        # JWT authentication  
-npm install @triva/cli        # CLI tools
-npm install @triva/shortcuts  # Developer shortcuts
-```
-
-## Next Steps
-
-- [First Server Tutorial](https://docs.trivajs.com/quick-start/first-server)
-- [Quick Examples](https://docs.trivajs.com/quick-start/examples)
-- [Configuration Options](https://docs.trivajs.com/core/configuration)
+- [Getting Started](/getting-started)
+- [First Server](/quick-start/first-server)
+- [Database Quick Start](/database/quick-start)

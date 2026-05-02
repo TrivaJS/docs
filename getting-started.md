@@ -1,46 +1,58 @@
 # Getting Started
 
-Triva is a production-ready Node.js HTTP framework with built-in middleware, caching, and database support.
+Triva is a class-based Node.js HTTP and HTTPS framework. You create an app with `new build(...)`, register routes on that instance, and start the server with `app.listen(...)`.
 
-## Quick Install
+## Install
 
 ```bash
 npm install triva
 ```
 
-## Your First Server
+Triva targets modern Node.js. Use Node 18 or newer so the runtime and extension packages behave consistently.
+
+## Your First App
 
 ```javascript
-import { build, get, listen } from 'triva';
+import { build } from 'triva';
 
-await build({
-  env: 'development'
+const app = new build({ env: 'development' });
+
+app.get('/api/users', (req, res) => {
+  res.json([
+    { id: 1, name: 'Ada' },
+    { id: 2, name: 'Grace' }
+  ]);
 });
 
-get('/', (req, res) => {
-  res.json({ message: 'Hello World' });
+app.get('/api/users/:id', (req, res) => {
+  const users = [
+    { id: 1, name: 'Ada' },
+    { id: 2, name: 'Grace' }
+  ];
+
+  const user = users.find((entry) => entry.id === Number(req.params.id));
+  if (!user) {
+    return res.status(404).json({ error: 'User not found' });
+  }
+
+  res.json(user);
 });
 
-listen(3000);
+app.listen(3000);
 ```
 
-## What's Included
+## What Triva Gives You
 
-- HTTP/HTTPS server
-- Built-in routing: `get`, `post`, `put`, `del`, `patch`
-- Middleware support (throttling, logging, error tracking)
-- Database adapters (MongoDB, PostgreSQL, Redis, MySQL, SQLite, and more)
-- Cache layer
-- Production defaults
+- Route methods on the app instance: `app.get()`, `app.post()`, `app.put()`, `app.del()`, `app.patch()`, `app.all()`, and `app.route()`
+- Request parsing through `await req.json()` and `await req.text()`
+- Response helpers such as `res.status()`, `res.json()`, `res.send()`, `res.html()`, `res.redirect()`, and `res.sendFile()`
+- Configurable cache adapters through `cache` plus the exported `cache` singleton for runtime reads and writes
+- Built-in throttle, retention, and error-tracking support through constructor options
+- HTTP or HTTPS startup through `protocol` and `ssl`
 
-## Next Steps
+## Read Next
 
-- [Installation Guide](https://docs.trivajs.com/installation)
-- [First Server Tutorial](https://docs.trivajs.com/quick-start/first-server)
-- [Core Concepts](https://docs.trivajs.com/core/concepts)
-- [API Reference](https://docs.trivajs.com/core/api)
-
-## Getting Help
-
-- GitHub: [github.com/trivajs/triva](https://github.com/trivajs/triva)
-- Email: contact@trivajs.com
+- [Installation](/installation)
+- [First Server](/quick-start/first-server)
+- [API Reference](/core/api)
+- [Configuration](/core/configuration)

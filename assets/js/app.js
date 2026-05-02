@@ -567,38 +567,188 @@ function ensureActiveSidebarItemVisible() {
 }
 
 function renderHomePage() {
-  const sections = SIDEBAR.map((section) => {
-    const items = (section.children || []).map((child) => `
-      <li><a href="${buildVersionedPath(child.path, CURRENT_VERSION)}">${child.title}</a></li>
+  const startCards = [
+    {
+      eyebrow: 'Install',
+      title: 'Get Triva running fast',
+      description: 'Start with installation, the framework shape, and the shortest path to a working app.',
+      href: getVersionStartHref(CURRENT_VERSION),
+      cta: 'Open getting started'
+    },
+    {
+      eyebrow: 'First app',
+      title: 'Build your first server',
+      description: 'Create routes, return JSON, and see the request and response flow in a minimal example.',
+      href: buildVersionedPath('/quick-start/first-server', CURRENT_VERSION),
+      cta: 'View first server'
+    },
+    {
+      eyebrow: 'Examples',
+      title: 'Start from working patterns',
+      description: 'Jump into REST APIs, authentication, uploads, caching, and production-ready setups.',
+      href: buildVersionedPath('/examples/rest-api', CURRENT_VERSION),
+      cta: 'Browse examples'
+    }
+  ].map((card) => `
+    <article class="doc-home-card">
+      <span class="doc-home-card-eyebrow">${escapeHtml(card.eyebrow)}</span>
+      <h3>${escapeHtml(card.title)}</h3>
+      <p>${escapeHtml(card.description)}</p>
+      <a href="${card.href}">${escapeHtml(card.cta)}</a>
+    </article>
+  `).join('');
+
+  const stackColumns = [
+    {
+      title: 'Core Runtime',
+      description: 'Learn the routing model, request and response helpers, configuration shape, and error flow.',
+      links: [
+        { title: 'API Reference', path: '/core/api' },
+        { title: 'Routing', path: '/core/routing' },
+        { title: 'Error Handling', path: '/core/error-handling' }
+      ]
+    },
+    {
+      title: 'Middleware',
+      description: 'Layer in throttling, logging, CORS, and custom middleware without guessing the order of execution.',
+      links: [
+        { title: 'Overview', path: '/middleware/overview' },
+        { title: 'Logging', path: '/middleware/logging' },
+        { title: 'CORS', path: '/middleware/cors' }
+      ]
+    },
+    {
+      title: 'Database and Cache',
+      description: 'Use Triva cache adapters across Redis, PostgreSQL, SQLite, MongoDB, and memory-backed workflows.',
+      links: [
+        { title: 'Overview', path: '/database/overview' },
+        { title: 'Adapters', path: '/database/adapters' },
+        { title: 'Redis', path: '/database/redis' }
+      ]
+    },
+    {
+      title: 'Deployment',
+      description: 'Move from local development to HTTPS, production hardening, and benchmark-aware tuning.',
+      links: [
+        { title: 'Production', path: '/deployment/production' },
+        { title: 'HTTPS', path: '/deployment/https' },
+        { title: 'Benchmarks', path: '/benchmarks' }
+      ]
+    }
+  ].map((column) => {
+    const links = column.links.map((link) => `
+      <li><a href="${buildVersionedPath(link.path, CURRENT_VERSION)}">${escapeHtml(link.title)}</a></li>
     `).join('');
 
     return `
-      <section class="doc-section">
-        <h2>${section.title}</h2>
-        <ul>${items}</ul>
-      </section>
+      <article class="doc-home-column">
+        <h3>${escapeHtml(column.title)}</h3>
+        <p>${escapeHtml(column.description)}</p>
+        <ul>${links}</ul>
+      </article>
     `;
   }).join('');
 
-  const versionCards = DOCS_CONFIG.versions.map((version) => `
-    <a class="doc-release-card${version.id === CURRENT_VERSION.id ? ' current' : ''}" href="${resolveVersionSwitchHref(version)}">
-      <span class="doc-release-tag">${escapeHtml(getVersionLabel(version))}</span>
-      <strong>${escapeHtml(getVersionDescription(version))}</strong>
-      <span class="doc-release-state">${escapeHtml(getVersionStatusLabel(version))}</span>
-    </a>
+  const supportCards = [
+    {
+      title: 'Extensions',
+      description: 'Add CORS, JWT, CLI workflows, and shortcuts without losing the framework shape.',
+      href: buildVersionedPath('/extensions/overview', CURRENT_VERSION),
+      cta: 'View extensions'
+    },
+    {
+      title: 'Support and Issues',
+      description: 'Know where to report bugs, request docs changes, or find the docs workspace itself.',
+      href: buildVersionedPath('/issues', CURRENT_VERSION),
+      cta: 'Get support'
+    },
+    {
+      title: 'Docs Workspace',
+      description: 'See how the docs site is organized and where versioned content lives inside this repository.',
+      href: buildVersionedPath('/README', CURRENT_VERSION),
+      cta: 'Open docs workspace'
+    }
+  ].map((card) => `
+    <article class="doc-home-mini-card">
+      <h3>${escapeHtml(card.title)}</h3>
+      <p>${escapeHtml(card.description)}</p>
+      <a href="${card.href}">${escapeHtml(card.cta)}</a>
+    </article>
   `).join('');
 
   return `
-    <div class="doc-home">
-      <h1>Triva Documentation</h1>
-      <p>Browse release-specific guides, examples, and adapter docs without losing your place.</p>
-      <div class="doc-release-grid">${versionCards}</div>
-      <div class="doc-home-actions">
-        <a href="${getVersionStartHref(CURRENT_VERSION)}">Start with Getting Started</a>
-        <a href="${buildVersionedPath('/quick-start/first-server', CURRENT_VERSION)}">Build Your First Server</a>
-        <a href="${buildVersionedPath('/issues', CURRENT_VERSION)}">Get Support</a>
-      </div>
-      <div class="doc-grid">${sections}</div>
+    <div class="doc-home doc-home-landing">
+      <section class="doc-home-hero">
+        <div class="doc-home-copy">
+          <div class="doc-home-eyebrow">
+            <span class="doc-home-kicker">Triva Docs</span>
+            <span class="doc-home-version-pill">${escapeHtml(getVersionLabel(CURRENT_VERSION))}</span>
+            <span class="doc-home-version-copy">${escapeHtml(getVersionStatusLabel(CURRENT_VERSION))}</span>
+          </div>
+          <h1>Build Node.js services without assembling the stack yourself.</h1>
+          <p class="doc-home-lead">Triva gives you routing, middleware, caching, database adapters, and deployment guidance in one runtime, with docs organized around shipping real servers instead of hunting through a directory tree.</p>
+          <div class="doc-home-actions">
+            <a class="doc-home-action-primary" href="${getVersionStartHref(CURRENT_VERSION)}">Get started</a>
+            <a class="doc-home-action-secondary" href="${buildVersionedPath('/core/api', CURRENT_VERSION)}">API reference</a>
+            <a class="doc-home-action-secondary" href="${buildVersionedPath('/examples/rest-api', CURRENT_VERSION)}">Working examples</a>
+          </div>
+          <div class="doc-home-command">
+            <span>Install</span>
+            <code>npm install triva</code>
+          </div>
+          <ul class="doc-home-signals">
+            <li>Release-specific docs with version switching in the sidebar</li>
+            <li>Real framework examples using <code>new build(...)</code></li>
+            <li>Guides for middleware, adapters, extensions, and deployment</li>
+          </ul>
+        </div>
+        <aside class="doc-home-code-shell" aria-label="Triva example">
+          <div class="doc-home-code-window">
+            <div class="doc-home-code-chrome" aria-hidden="true">
+              <span></span>
+              <span></span>
+              <span></span>
+            </div>
+            <pre class="doc-home-code"><code><span class="token-keyword">import</span> { build } <span class="token-keyword">from</span> <span class="token-string">'triva'</span>;
+
+<span class="token-keyword">const</span> app = <span class="token-keyword">new</span> build({ env: <span class="token-string">'development'</span> });
+<span class="token-keyword">const</span> users = [{ id: <span class="token-number">1</span>, name: <span class="token-string">'Ada'</span> }];
+
+app.get(<span class="token-string">'/api/users/:id'</span>, (req, res) => {
+  <span class="token-keyword">const</span> user = users.find((entry) => entry.id === Number(req.params.id));
+
+  <span class="token-keyword">if</span> (!user) {
+    <span class="token-keyword">return</span> res.status(<span class="token-number">404</span>).json({ error: <span class="token-string">'User not found'</span> });
+  }
+
+  res.json(user);
+});
+
+app.listen(<span class="token-number">3000</span>);</code></pre>
+          </div>
+          <p class="doc-home-code-note">The docs open with the real Triva application shape instead of a section directory.</p>
+        </aside>
+      </section>
+
+      <section class="doc-home-banner">
+        <strong>${escapeHtml(getVersionLabel(CURRENT_VERSION))} is the current stable docs line.</strong>
+        <span>Use the sidebar switcher to stay in the same part of the docs as future releases ship.</span>
+      </section>
+
+      <section class="doc-home-section">
+        <h2>Start here</h2>
+        <div class="doc-home-card-grid">${startCards}</div>
+      </section>
+
+      <section class="doc-home-section">
+        <h2>Explore the stack</h2>
+        <div class="doc-home-column-grid">${stackColumns}</div>
+      </section>
+
+      <section class="doc-home-section">
+        <h2>Keep moving</h2>
+        <div class="doc-home-mini-grid">${supportCards}</div>
+      </section>
     </div>
   `;
 }

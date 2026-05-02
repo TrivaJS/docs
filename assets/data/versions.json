@@ -1,0 +1,15 @@
+{
+  "defaultVersion": "v1",
+  "versions": [
+    {
+      "id": "v1",
+      "label": "v1",
+      "description": "Current stable release",
+      "status": "latest",
+      "routePrefix": "/v1",
+      "contentRoot": "",
+      "navigation": "/assets/data/navigation.json",
+      "home": "/getting-started"
+    }
+  ]
+}
