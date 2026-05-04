@@ -1,6 +1,8 @@
 # CORS Extension
 
-`@trivajs/cors` adds configurable Cross-Origin Resource Sharing middleware for Triva applications.
+## Package
+
+`@trivajs/cors`
 
 ## Install
 
@@ -8,36 +10,26 @@
 npm install @trivajs/cors
 ```
 
-## Basic Usage
+## Example
 
 ```javascript
 import { build } from 'triva';
 import { cors } from '@trivajs/cors';
 
-const app = new build();
+const app = new build({ env: 'development' });
 
 app.use(cors({
   origin: 'https://app.example.com',
-  credentials: true
+  credentials: true,
+  allowedHeaders: ['Content-Type', 'Authorization']
 }));
-
-app.get('/api/data', (req, res) => {
-  res.json({ ok: true });
-});
-
-app.listen(3000);
 ```
 
-## Common Options
+## Presets
 
-- `origin`
-- `methods`
-- `allowedHeaders`
-- `exposedHeaders`
-- `credentials`
-- `maxAge`
+The package also exposes:
 
-## Related Docs
-
-- [Middleware CORS Guide](https://docs.trivajs.com/middleware/cors)
-- [Custom Middleware](https://docs.trivajs.com/middleware/custom)
+- `corsDevMode()`
+- `corsStrict(origin)`
+- `corsMultiOrigin(origins)`
+- `corsDynamic(validator)`

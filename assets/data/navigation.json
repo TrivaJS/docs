@@ -12,29 +12,16 @@
           "path": "/installation"
         },
         {
+          "title": "Benchmarks",
+          "path": "/benchmarks"
+        },
+        {
           "title": "Support and Issues",
           "path": "/issues"
         },
         {
           "title": "Docs Workspace",
           "path": "/README"
-        }
-      ]
-    },
-    {
-      "title": "Project",
-      "children": [
-        {
-          "title": "Changes",
-          "path": "/changes"
-        },
-        {
-          "title": "Roadmap",
-          "path": "/roadmap"
-        },
-        {
-          "title": "Benchmarks",
-          "path": "/benchmarks"
         }
       ]
     },
@@ -247,10 +234,6 @@
         {
           "title": "Contributing",
           "path": "/policies/contributing"
-        },
-        {
-          "title": "Funding",
-          "path": "/policies/funding"
         },
         {
           "title": "Code of Conduct",

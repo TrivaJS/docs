@@ -1,17 +1,12 @@
-# REST API Example
-
-This example uses the current class-based Triva API for a small in-memory CRUD service.
-
-## Example
+# REST API
 
 ```javascript
 import { build } from 'triva';
 
 const app = new build({ env: 'development' });
-
-let users = [
-  { id: 1, name: 'Alice' },
-  { id: 2, name: 'Bob' }
+const users = [
+  { id: 1, name: 'Ada' },
+  { id: 2, name: 'Grace' }
 ];
 
 app.get('/api/users', (req, res) => {
@@ -34,38 +29,11 @@ app.post('/api/users', async (req, res) => {
 });
 
 app.put('/api/users/:id', async (req, res) => {
-  const index = users.findIndex((entry) => entry.id === Number(req.params.id));
-  if (index === -1) {
-    return res.status(404).json({ error: 'User not found' });
-  }
-
   const body = await req.json();
-  users[index] = { ...users[index], ...body };
-  res.json(users[index]);
+  res.json({ id: req.params.id, updated: body });
 });
 
 app.del('/api/users/:id', (req, res) => {
-  const index = users.findIndex((entry) => entry.id === Number(req.params.id));
-  if (index === -1) {
-    return res.status(404).json({ error: 'User not found' });
-  }
-
-  users.splice(index, 1);
-  res.status(204).end();
+  res.json({ deleted: req.params.id });
 });
-
-app.listen(3000);
 ```
-
-## What It Shows
-
-- route registration on the app instance
-- route params through `req.params`
-- explicit JSON parsing through `await req.json()`
-- `201`, `404`, and `204` response patterns
-
-## Related Docs
-
-- [Routing](https://docs.trivajs.com/core/routing)
-- [Request Object](https://docs.trivajs.com/core/request)
-- [Response Object](https://docs.trivajs.com/core/response)

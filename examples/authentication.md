@@ -1,25 +1,25 @@
-# Authentication Example
+# Authentication
 
-A common Triva auth flow is the core framework plus the JWT extension.
+This example uses the official JWT extension.
+
+## Install
+
+```bash
+npm install @triva/jwt
+```
 
 ## Example
 
 ```javascript
 import { build } from 'triva';
-import { sign, protect } from '@triva/jwt';
+import { sign, protect, requireRole } from '@triva/jwt';
 
-const app = new build({ env: 'production' });
+const app = new build({ env: 'development' });
 
 app.post('/auth/login', async (req, res) => {
-  const { email, password } = await req.json();
-  const user = await verifyCredentials(email, password);
-
-  if (!user) {
-    return res.status(401).json({ error: 'Invalid credentials' });
-  }
-
+  const { username } = await req.json();
   const token = sign(
-    { userId: user.id, role: user.role },
+    { userId: 1, username, role: 'admin' },
     process.env.JWT_SECRET,
     { expiresIn: '24h' }
   );
@@ -31,16 +31,7 @@ app.get('/api/profile', protect(), (req, res) => {
   res.json({ user: req.user });
 });
 
-app.listen(3000);
+app.get('/api/admin', protect(), requireRole('admin'), (req, res) => {
+  res.json({ ok: true });
+});
 ```
-
-## Notes
-
-- parse login payloads with `await req.json()`
-- keep `JWT_SECRET` in environment variables
-- layer `requireRole()` or `requirePermission()` after `protect()` when needed
-
-## Related Docs
-
-- [JWT Extension](https://docs.trivajs.com/extensions/jwt)
-- [Security Policy](https://docs.trivajs.com/policies/security)

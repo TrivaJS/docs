@@ -1,82 +1,51 @@
-# First Server Tutorial
+# First Server
 
-Build a small Triva app from scratch.
+This is the shortest path from install to a working Triva app.
 
-## Step 1: Create A Project
-
-```bash
-mkdir my-triva-app
-cd my-triva-app
-npm init -y
-npm install triva
-```
-
-## Step 2: Create `server.js`
+## Basic Example
 
 ```javascript
 import { build } from 'triva';
 
 const app = new build({ env: 'development' });
+const users = [
+  { id: 1, name: 'Ada' },
+  { id: 2, name: 'Grace' }
+];
 
-app.get('/', (req, res) => {
-  res.json({ message: 'Hello from Triva' });
+app.get('/api/users', (req, res) => {
+  res.json(users);
+});
+
+app.get('/api/users/:id', (req, res) => {
+  const user = users.find((entry) => entry.id === Number(req.params.id));
+  if (!user) {
+    return res.status(404).json({ error: 'User not found' });
+  }
+
+  res.json(user);
+});
+
+app.post('/api/users', async (req, res) => {
+  const body = await req.json();
+  const user = { id: users.length + 1, ...body };
+  users.push(user);
+  res.status(201).json(user);
 });
 
 app.listen(3000);
 ```
 
-## Step 3: Run It
+## What This Shows
 
-```bash
-node server.js
-```
-
-Then open `http://localhost:3000`.
-
-## Step 4: Add A Route Parameter
-
-```javascript
-app.get('/users/:id', (req, res) => {
-  res.json({ id: req.params.id });
-});
-```
-
-## Step 5: Add A JSON POST Route
-
-```javascript
-app.post('/users', async (req, res) => {
-  const body = await req.json();
-  res.status(201).json({ created: body });
-});
-```
-
-Try it with curl:
-
-```bash
-curl http://localhost:3000/users/42
-curl -X POST http://localhost:3000/users -H "Content-Type: application/json" -d '{"name":"Alice"}'
-```
-
-## Step 6: Add Cache And Throttle
-
-```javascript
-const app = new build({
-  env: 'development',
-  cache: {
-    type: 'memory',
-    retention: 300000
-  },
-  throttle: {
-    limit: 100,
-    window_ms: 60000
-  }
-});
-```
-
-Use a cache backend whenever you enable throttling, because the throttle middleware stores counters through the cache layer.
+- route registration on the app instance
+- path parameters through `req.params`
+- JSON body parsing through `await req.json()`
+- status codes through `res.status()`
 
 ## Next Steps
 
-- [Quick Examples](https://docs.trivajs.com/quick-start/examples)
-- [Routing Guide](https://docs.trivajs.com/core/routing)
-- [Configuration Guide](https://docs.trivajs.com/core/configuration)
+- [Quick Start Examples](/quick-start/examples)
+- [Routing](/core/routing)
+- [Request](/core/request)
+- [Response](/core/response)

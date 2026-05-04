@@ -1,6 +1,8 @@
 # CLI Extension
 
-`@trivajs/cli` provides terminal-first commands for common operational workflows.
+## Package
+
+`@trivajs/cli`
 
 ## Install
 
@@ -8,23 +10,17 @@
 npm install -g @trivajs/cli
 ```
 
-Or run it without a global install:
-
-```bash
-npx @trivajs/cli logs list
-```
-
 ## Common Commands
 
 ```bash
 triva logs list
 triva errors list
+triva cache list
 triva cache get user:123
 triva stats health
 triva server status
 ```
 
-## Related Docs
+## Notes
 
-- [Production Deployment](https://docs.trivajs.com/deployment/production)
-- [Extensions Overview](https://docs.trivajs.com/extensions/overview)
+The CLI is aimed at inspecting logs, errors, cache state, and server health around a Triva application.

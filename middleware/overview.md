@@ -1,54 +1,42 @@
 # Middleware Overview
 
-Middleware in Triva falls into three buckets:
+Triva middleware falls into two groups:
 
-1. custom functions you register with `app.use(...)`
-2. route-specific handlers passed before the final route handler
-3. constructor-wired middleware created from `throttle` and `retention` options
+- built-in runtime middleware configured through constructor options
+- application middleware registered with `app.use()` or attached to routes
+
+## Built-In Runtime Middleware
+
+```javascript
+const app = new build({
+  throttle: { limit: 100, window_ms: 60000 },
+  retention: { enabled: true, maxEntries: 10000 },
+  errorTracking: { enabled: true }
+});
+```
 
 ## Custom Middleware
 
 ```javascript
-import { build } from 'triva';
-
-const app = new build({ env: 'development' });
-
-app.use((req, res, next) => {
-  console.log(`${req.method} ${req.url}`);
+const stampRequest = (req, res, next) => {
+  req.receivedAt = Date.now();
   next();
-});
+};
+
+app.use(stampRequest);
 ```
 
-## Constructor-Wired Middleware
+## Route-Level Middleware
 
 ```javascript
-const app = new build({
-  cache: { type: 'memory' },
-  throttle: {
-    limit: 100,
-    window_ms: 60000
-  },
-  retention: {
-    enabled: true,
-    maxEntries: 50000
+const requireApiKey = (req, res, next) => {
+  if (req.headers['x-api-key'] !== process.env.API_KEY) {
+    return res.status(401).json({ error: 'Invalid API key' });
   }
+  next();
+};
+
+app.get('/admin', requireApiKey, (req, res) => {
+  res.json({ ok: true });
 });
 ```
-
-Because throttling uses the cache layer, configure `cache` alongside `throttle`.
-
-## Extension Middleware
-
-- CORS: `@trivajs/cors`
-- JWT auth helpers: `@triva/jwt`
-
-## Logging Note
-
-Current Triva docs should not advertise a `logging` constructor block. If you need request logging, add it yourself with middleware you control.
-
-## Related Docs
-
-- [Custom Middleware](https://docs.trivajs.com/middleware/custom)
-- [Throttling](https://docs.trivajs.com/middleware/throttling)
-- [Error Tracking](https://docs.trivajs.com/middleware/error-tracking)
-- [CORS](https://docs.trivajs.com/middleware/cors)

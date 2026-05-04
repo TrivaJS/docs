@@ -3,15 +3,15 @@
 ## Requirements
 
 - Node.js 18 or newer
-- npm 8 or newer
+- npm, pnpm, or yarn
 
-## Install Triva
+## Framework Install
 
 ```bash
 npm install triva
 ```
 
-## Create A Starter App
+## Minimal Smoke Test
 
 ```javascript
 import { build } from 'triva';
@@ -19,43 +19,58 @@ import { build } from 'triva';
 const app = new build({ env: 'development' });
 
 app.get('/', (req, res) => {
-  res.json({ status: 'running' });
+  res.send('Triva is installed');
 });
 
 app.listen(3000);
 ```
 
-## Run It
+Run the file and open `http://localhost:3000`.
 
-```bash
-node server.js
-```
+## Optional Extension Packages
 
-## Optional Adapter Packages
-
-Install only the adapters you plan to use:
-
-```bash
-npm install mongodb
-npm install pg
-npm install mysql2
-npm install redis
-npm install sqlite3
-npm install better-sqlite3
-npm install @supabase/supabase-js
-```
-
-## Official Extensions
+Install only the packages you need:
 
 ```bash
 npm install @trivajs/cors
 npm install @triva/jwt
-npm install -g @trivajs/cli
+npm install @trivajs/cli
 npm install @trivajs/shortcuts
 ```
 
-## Next Steps
+## Optional Adapter Drivers
 
-- [Getting Started](https://docs.trivajs.com/getting-started)
-- [First Server Tutorial](https://docs.trivajs.com/quick-start/first-server)
-- [Configuration](https://docs.trivajs.com/core/configuration)
+Some cache adapters need their own driver package in your app:
+
+- Redis
+- MongoDB
+- PostgreSQL
+- MySQL
+- SQLite
+- Better-SQLite3
+- Supabase
+
+Start with the [adapter overview](/database/adapters) before wiring one into `cache`.
+
+## HTTPS Note
+
+If you run Triva with `protocol: 'https'`, provide `ssl.key` and `ssl.cert`:
+
+```javascript
+import fs from 'fs';
+import { build } from 'triva';
+
+const app = new build({
+  protocol: 'https',
+  ssl: {
+    key: fs.readFileSync('./certs/localhost-key.pem'),
+    cert: fs.readFileSync('./certs/localhost-cert.pem')
+  }
+});
+```
+
+## Read Next
+
+- [Getting Started](/getting-started)
+- [First Server](/quick-start/first-server)
+- [Database Quick Start](/database/quick-start)

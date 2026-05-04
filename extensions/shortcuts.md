@@ -1,6 +1,8 @@
 # Shortcuts Extension
 
-`@trivajs/shortcuts` installs editor snippets so you can scaffold routes, middleware, and common Triva patterns faster.
+## Package
+
+`@trivajs/shortcuts`
 
 ## Install
 
@@ -8,13 +10,29 @@
 npm install @trivajs/shortcuts
 ```
 
-## What You Get
+The package installs editor snippets for Triva workflows.
 
-- route snippets such as `triva-get` and `triva-post`
-- middleware and configuration snippets
-- adapter setup snippets for common cache backends
+## Example Snippets
 
-## Related Docs
+- `triva-server`
+- `triva-get`
+- `triva-post`
+- `triva-del`
+- `triva-cache-get`
+- `triva-cache-set`
 
-- [Extensions Overview](https://docs.trivajs.com/extensions/overview)
-- [First Server Tutorial](https://docs.trivajs.com/quick-start/first-server)
+## Generated Code Shape
+
+The snippets should produce the current Triva API shape:
+
+```javascript
+import { build } from 'triva';
+
+const app = new build({ env: 'development' });
+
+app.get('/api', (req, res) => {
+  res.json({ ok: true });
+});
+
+app.listen(3000);
+```

@@ -1,44 +1,43 @@
 # Docs Workspace
 
-This directory powers [docs.trivajs.com](https://docs.trivajs.com/getting-started), the public documentation site for Triva.
+This folder powers the Triva documentation site.
 
-## What Lives Here
+## Structure
 
-- Product documentation pages in Markdown
-- Static assets for the docs UI
-- Sidebar/navigation data
-- The lightweight HTML app that renders Markdown pages in the browser
+- `index.html` contains the docs shell
+- `assets/js/app.js` handles routing, markdown rendering, version switching, and smooth page navigation
+- `assets/css/style.css` contains the docs-site layout and homepage styling
+- `assets/data/navigation.json` defines the published sidebar navigation
+- `assets/data/versions.json` defines available docs versions
 
-## Content Layout
+## Versioning Model
 
-- `getting-started.md`, `installation.md`, `changes.md`, `roadmap.md`: top-level entry pages
-- `core/`: API and framework concepts
-- `middleware/`: built-in middleware guides
-- `database/`: adapter and cache documentation
-- `deployment/`: HTTPS and production deployment guides
-- `examples/`: runnable patterns and reference implementations
-- `extensions/`: official package add-ons
-- `policies/`: governance, legal, and security documents
-- `assets/`: CSS, JavaScript, and navigation data
+The docs UI is version-aware.
 
-## Working Locally
+- `/` renders the current docs landing page
+- `/v1/...` is the canonical route shape for published Triva v1 pages
+- unversioned internal links are normalized into the active docs version
 
-The docs app is static, so any simple file server is enough for local review.
+That means we can add future docs sets without rebuilding the shell. A later release can point its own manifest entry at a separate content root.
 
-```bash
-npx serve docs
-```
+## Published vs Source Pages
 
-Then open the local URL from the server output and browse the docs routes normally.
+Not every Markdown file in this folder is meant to be published in the sidebar. The published route set is controlled by `navigation.json`.
 
-## Updating Navigation
+The `changes.md` and `roadmap.md` files can stay in the workspace for reference, but they are not part of the public docs navigation.
 
-When you add a new page under `docs/`, also update `docs/assets/data/navigation.json` so the page appears in the HTML sidebar and previous/next navigation.
+## Working on Content
 
-## Contributing
+Use the real runtime API when updating pages:
 
-Please review the public contribution guidelines before changing framework docs or policies:
+- create apps with `new build(...)`
+- parse request bodies with `await req.json()` or `await req.text()`
+- use `cache.get()`, `cache.set()`, `cache.delete()`, and `cache.keys()`
+- configure HTTP or HTTPS through `protocol` and `ssl`
 
-- Contributing guide: [docs.trivajs.com/policies/contributing](https://docs.trivajs.com/policies/contributing)
-- Code of conduct: [docs.trivajs.com/policies/code-of-conduct](https://docs.trivajs.com/policies/code-of-conduct)
-- Security policy: [docs.trivajs.com/policies/security](https://docs.trivajs.com/policies/security)
+## Useful Routes
+
+- [Getting Started](/getting-started)
+- [API Reference](/core/api)
+- [Examples](/examples/rest-api)
+- [Policies](/policies/contributing)

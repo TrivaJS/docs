@@ -1,6 +1,8 @@
 # JWT Extension
 
-`@triva/jwt` provides token signing, verification, route protection, and role checks.
+## Package
+
+`@triva/jwt`
 
 ## Install
 
@@ -8,24 +10,19 @@
 npm install @triva/jwt
 ```
 
-## Basic Usage
+## Example
 
 ```javascript
 import { build } from 'triva';
 import { sign, protect, requireRole } from '@triva/jwt';
 
-const app = new build({ env: 'production' });
+const app = new build({ env: 'development' });
 
 app.post('/auth/login', async (req, res) => {
-  const { email, password } = await req.json();
-  const user = await verifyCredentials(email, password);
-
-  if (!user) {
-    return res.status(401).json({ error: 'Invalid credentials' });
-  }
+  const { username } = await req.json();
 
   const token = sign(
-    { userId: user.id, role: user.role },
+    { userId: 1, username, role: 'admin' },
     process.env.JWT_SECRET,
     { expiresIn: '24h' }
   );
@@ -33,21 +30,16 @@ app.post('/auth/login', async (req, res) => {
   res.json({ token });
 });
 
-app.get('/admin', protect(), requireRole('admin'), (req, res) => {
+app.get('/api/admin', protect(), requireRole('admin'), (req, res) => {
   res.json({ ok: true });
 });
 ```
 
-## What It Adds
+## Main Exports
 
-- `sign()`
-- `verify()`
-- `decode()`
-- `protect()`
-- `requireRole()`
-- `requirePermission()`
-
-## Related Docs
-
-- [Authentication Example](https://docs.trivajs.com/examples/authentication)
-- [Security Policy](https://docs.trivajs.com/policies/security)
+- `sign(payload, secret, options?)`
+- `verify(token, secret)`
+- `decode(token)`
+- `protect(options?)`
+- `requireRole(...roles)`
+- `requirePermission(...permissions)`

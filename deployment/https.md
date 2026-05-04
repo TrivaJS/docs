@@ -1,46 +1,40 @@
-# HTTPS Deployment
+# HTTPS
 
-Triva can create an HTTPS server directly when you set `protocol: 'https'` and provide `ssl` credentials.
+Triva can serve HTTPS directly by setting `protocol: 'https'` and supplying `ssl.key` plus `ssl.cert`.
 
-## Basic Setup
+## Basic HTTPS Server
 
 ```javascript
+import fs from 'fs';
 import { build } from 'triva';
-import { readFileSync } from 'fs';
 
 const app = new build({
   env: 'production',
   protocol: 'https',
   ssl: {
-    key: readFileSync('./ssl/key.pem'),
-    cert: readFileSync('./ssl/cert.pem')
+    key: fs.readFileSync('./certs/localhost-key.pem'),
+    cert: fs.readFileSync('./certs/localhost-cert.pem')
   }
 });
 
-app.get('/health', (req, res) => {
-  res.json({ status: 'ok', secure: true });
+app.get('/secure', (req, res) => {
+  res.json({ secure: true });
 });
 
-app.listen(443);
+app.listen(3443);
 ```
 
-## Development Certificates
+## Redirecting HTTP Yourself
 
-For local testing, generate self-signed certs with a command like:
+Triva does not use the legacy `autoRedirect` docs shape. If you want an HTTP listener that redirects to HTTPS, run a second app and return a redirect explicitly.
 
-```bash
-openssl req -x509 -newkey rsa:2048 -nodes -sha256 -subj "/CN=localhost" -keyout localhost-key.pem -out localhost-cert.pem
+```javascript
+const httpApp = new build({ protocol: 'http' });
+
+httpApp.get('*', (req, res) => {
+  const host = req.headers.host.split(':')[0];
+  res.redirect(`https://${host}:3443${req.url}`, 301);
+});
+
+httpApp.listen(3000);
 ```
-
-## Reverse Proxy Guidance
-
-If you already terminate TLS at Nginx, Caddy, a load balancer, or an ingress controller, keep Triva on HTTP behind that proxy and let the proxy handle certificates and redirects.
-
-## Redirects
-
-Triva's current constructor API does not expose an `autoRedirect` or `https.enabled` switch. If you want HTTP to HTTPS redirects, handle them at your proxy or with a separate lightweight HTTP listener.
-
-## Related Docs
-
-- [Production Deployment](https://docs.trivajs.com/deployment/production)
-- [Configuration](https://docs.trivajs.com/core/configuration)

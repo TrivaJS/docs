@@ -1,116 +1,52 @@
 # API Reference
 
-This page covers the public Triva surface that is visible in the current runtime and type definitions.
-
-## Create An App
+## Constructor
 
 ```javascript
 import { build } from 'triva';
 
-const app = new build({ env: 'development' });
-```
-
-## Application Methods
-
-### Routing
-
-```javascript
-app.get(path, ...handlers)
-app.post(path, ...handlers)
-app.put(path, ...handlers)
-app.del(path, ...handlers)
-app.delete(path, ...handlers)
-app.patch(path, ...handlers)
-app.all(path, ...handlers)
-app.route(path)
-```
-
-Example:
-
-```javascript
-app.get('/api/users/:id', (req, res) => {
-  res.json({ id: req.params.id });
-});
-
-app.post('/api/users', async (req, res) => {
-  const body = await req.json();
-  res.status(201).json(body);
+const app = new build({
+  env: 'development',
+  cache: { type: 'memory' },
+  throttle: { limit: 100, window_ms: 60000 },
+  retention: { enabled: true, maxEntries: 10000 },
+  errorTracking: { enabled: true }
 });
 ```
 
-### Middleware
+The constructor returns an application instance immediately. You do not `await` it.
 
-```javascript
-app.use(middleware)
-```
+## Route Methods
 
-Example:
+- `app.get(path, ...handlers)`
+- `app.post(path, ...handlers)`
+- `app.put(path, ...handlers)`
+- `app.del(path, ...handlers)`
+- `app.delete(path, ...handlers)`
+- `app.patch(path, ...handlers)`
+- `app.all(path, ...handlers)`
+- `app.route(path)`
 
-```javascript
-app.use((req, res, next) => {
-  console.log(`${req.method} ${req.url}`);
-  next();
-});
-```
+## Middleware and Lifecycle
 
-### Error and 404 Handlers
+- `app.use(middleware)`
+- `app.listen(port, callback?)`
+- `app.close(callback?)`
 
-```javascript
-app.setErrorHandler((err, req, res) => {
-  res.status(500).json({ error: 'Internal Server Error' });
-});
+## Request Surface
 
-app.setNotFoundHandler((req, res) => {
-  res.status(404).json({ error: 'Route not found' });
-});
-```
-
-### Settings and Views
-
-```javascript
-app.set(key, value)
-app.get(key)
-app.enable(key)
-app.disable(key)
-app.enabled(key)
-app.disabled(key)
-app.engine(ext, fn)
-```
-
-### Server Startup
-
-```javascript
-app.listen(port, callback)
-```
-
-## Request Helpers
-
-Triva adds these helpers before your route handler runs:
+Inside handlers, Triva gives you:
 
 - `req.params`
 - `req.query`
 - `req.pathname`
-- `req.json()`
-- `req.text()`
+- `req.cookies`
+- `await req.json()`
+- `await req.text()`
 
-Example:
+Do not document `req.body` as the main public API. Parse the body explicitly.
 
-```javascript
-app.post('/api/users/:id', async (req, res) => {
-  const body = await req.json();
-
-  res.json({
-    id: req.params.id,
-    search: req.query.search,
-    pathname: req.pathname,
-    body
-  });
-});
-```
-
-## Response Helpers
-
-Triva binds these helpers onto `res`:
+## Response Surface
 
 - `res.status(code)`
 - `res.header(name, value)`
@@ -119,56 +55,38 @@ Triva binds these helpers onto `res`:
 - `res.html(html)`
 - `res.redirect(url, code?)`
 - `res.jsonp(data, callbackParam?)`
-- `res.download(filepath, filename?)`
 - `res.sendFile(filepath, options?)`
-- `res.render(view, locals?, callback?)`
-- `res.end(data?)`
+- `res.download(filepath, filename?)`
+- `res.cookie(name, value, options?)`
+- `res.clearCookie(name, options?)`
 
-Example:
+## Standalone Exports
 
-```javascript
-app.get('/download', (req, res) => {
-  res.download('./reports/latest.pdf');
-});
+Triva also exports:
 
-app.get('/legacy', (req, res) => {
-  res.redirect('/new-location', 301);
-});
-```
-
-## Cache API
-
-The exported `cache` singleton exposes the runtime cache adapter.
-
-```javascript
-import { cache } from 'triva';
-
-await cache.set('user:1', { id: 1, name: 'Alice' }, 300000);
-const user = await cache.get('user:1');
-const exists = await cache.has('user:1');
-const keys = await cache.keys('user:*');
-await cache.delete('user:1');
-await cache.clear();
-const stats = await cache.stats();
-```
-
-TTL values are in milliseconds.
-
-## Other Exports
-
-Useful additional exports from `triva` include:
-
-- `middleware`
-- `errorTracker`
-- `log`
-- `cookieParser`
+- `cache`
 - `configCache`
-- `createAdapter`
-- `isAI`, `isBot`, `isCrawler`
+- `log`
+- `errorTracker`
+- `cookieParser`
 
-## Related Docs
+## Example
 
-- [Request Object](https://docs.trivajs.com/core/request)
-- [Response Object](https://docs.trivajs.com/core/response)
-- [Routing](https://docs.trivajs.com/core/routing)
-- [Configuration](https://docs.trivajs.com/core/configuration)
+```javascript
+import { build, cache } from 'triva';
+
+const app = new build({ cache: { type: 'memory' } });
+
+app.get('/health', (req, res) => {
+  res.json({ ok: true });
+});
+
+app.get('/cache/:key', async (req, res) => {
+  const value = await cache.get(req.params.key);
+  if (!value) {
+    return res.status(404).json({ error: 'Missing cache entry' });
+  }
+
+  res.json({ key: req.params.key, value });
+});
+```

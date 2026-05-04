@@ -1,134 +1,58 @@
-# Response Object
+# Response
 
-Triva attaches response helpers to the native Node.js response object before your route handler runs.
+Triva extends the native Node response with chainable helpers.
 
-## `res.status(code)`
+## Common Helpers
 
 ```javascript
-app.get('/missing', (req, res) => {
-  res.status(404).json({ error: 'Not found' });
+app.get('/helpers', (req, res) => {
+  res.status(200).json({ ok: true });
 });
 ```
 
-## `res.header(name, value)`
+- `res.status(code)`
+- `res.header(name, value)`
+- `res.json(data)`
+- `res.send(data)`
+- `res.html(html)`
+- `res.redirect(url, code?)`
+- `res.sendFile(filepath, options?)`
+- `res.download(filepath, filename?)`
+- `res.cookie(name, value, options?)`
+- `res.clearCookie(name, options?)`
+
+## JSON
 
 ```javascript
-app.get('/headers', (req, res) => {
-  res.header('X-Trace-Id', 'abc123').json({ ok: true });
+app.get('/api/status', (req, res) => {
+  res.json({ healthy: true, at: new Date().toISOString() });
 });
 ```
 
-## `res.json(data)`
+## Plain Text or HTML
 
 ```javascript
-app.get('/users', (req, res) => {
-  res.json([{ id: 1, name: 'Alice' }]);
-});
-```
-
-## `res.send(data)`
-
-`res.send()` is convenient for plain text and also auto-detects simple HTML strings.
-
-```javascript
-app.get('/', (req, res) => {
+app.get('/hello', (req, res) => {
   res.send('Hello from Triva');
 });
-```
 
-## `res.html(html)`
-
-```javascript
-app.get('/landing', (req, res) => {
+app.get('/page', (req, res) => {
   res.html('<h1>Triva</h1>');
 });
 ```
 
-## `res.redirect(url, code?)`
-
-Pass the status code as the second argument.
+## Redirects
 
 ```javascript
-app.get('/legacy', (req, res) => {
-  res.redirect('/new-location', 301);
+app.get('/old-path', (req, res) => {
+  res.redirect('/new-path', 301);
 });
 ```
 
-## `res.jsonp(data, callbackParam?)`
+## Files
 
 ```javascript
-app.get('/feed', (req, res) => {
-  res.jsonp({ ok: true });
+app.get('/download', (req, res) => {
+  res.sendFile('./reports/latest.json');
 });
 ```
-
-## `res.download(filepath, filename?)`
-
-```javascript
-app.get('/reports/latest', (req, res) => {
-  res.download('./reports/latest.pdf');
-});
-```
-
-## `res.sendFile(filepath, options?)`
-
-```javascript
-app.get('/docs', (req, res) => {
-  res.sendFile('./public/index.html');
-});
-```
-
-## `res.render(view, locals?, callback?)`
-
-`res.render()` requires a registered engine and the related app settings.
-
-```javascript
-import ejs from 'ejs';
-
-app.engine('ejs', ejs.renderFile);
-app.set('view engine', 'ejs');
-app.set('views', './views');
-
-app.get('/', (req, res) => {
-  res.render('index', { title: 'Home' });
-});
-```
-
-## `res.end(data?)`
-
-```javascript
-app.get('/empty', (req, res) => {
-  res.status(204).end();
-});
-```
-
-## Common Patterns
-
-### Created Resource
-
-```javascript
-app.post('/users', async (req, res) => {
-  const body = await req.json();
-  res.status(201).json({ id: Date.now(), ...body });
-});
-```
-
-### Validation Failure
-
-```javascript
-app.post('/login', async (req, res) => {
-  const body = await req.json();
-
-  if (!body.email || !body.password) {
-    return res.status(400).json({ error: 'Email and password are required' });
-  }
-
-  res.json({ ok: true });
-});
-```
-
-## Related Docs
-
-- [Request Object](https://docs.trivajs.com/core/request)
-- [Routing](https://docs.trivajs.com/core/routing)
-- [API Reference](https://docs.trivajs.com/core/api)

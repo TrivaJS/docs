@@ -1,6 +1,6 @@
 # Benchmarks
 
-Triva includes a benchmark suite for routing, middleware, caching, throttling, logging, HTTP, and HTTPS workflows.
+The Triva repository ships a benchmark suite in `benchmark/` for routing, middleware, throttle checks, cache operations, HTTP throughput, and logging overhead.
 
 ## Run the Full Suite
 
@@ -11,49 +11,37 @@ npm run benchmark
 ## Run Individual Benchmarks
 
 ```bash
-npm run benchmark:cache
-npm run benchmark:routing
-npm run benchmark:middleware
-npm run benchmark:throttle
-npm run benchmark:logging
-npm run benchmark:http
-npm run benchmark:https
-npm run benchmark:rps
+node benchmark/bench-routing.js
+node benchmark/bench-middleware.js
+node benchmark/bench-cache.js
+node benchmark/bench-throttle.js
+node benchmark/bench-http.js
+node benchmark/bench-logging.js
 ```
 
-## What Gets Measured
+## What the Suite Measures
 
-- cache adapter throughput and latency
-- route matching and parameter extraction
-- middleware chain overhead
-- throttling policy performance
-- request logging cost
-- end-to-end request handling
+- Route matching and parameter extraction
+- Middleware-chain overhead
+- Cache `get`, `set`, `delete`, `keys`, and TTL behavior
+- End-to-end request throughput
+- Throttle policy cost
+- Logging and retention overhead
 
-## Reading the Output
+## Read Results Carefully
 
-Each benchmark reports:
+Benchmark output is only meaningful when you note:
 
-- average duration
-- percentile latency (`P50`, `P95`, `P99`)
-- throughput
-- memory delta where relevant
+- Node.js version
+- machine and CPU
+- adapter choice
+- concurrency level
+- whether you benchmarked HTTP or HTTPS
 
-## Recommended Workflow
-
-1. Record a baseline on your current branch.
-2. Make the framework or adapter change.
-3. Re-run the same benchmark command.
-4. Compare the new output for regressions or wins.
-
-## Useful Tips
-
-- Run benchmarks on a quiet machine when possible.
-- Use the same Node.js version when comparing runs.
-- Re-run a suite several times before treating small changes as meaningful.
+Use the benchmark suite to compare changes in your own environment, not as a universal claim across machines.
 
 ## Related Docs
 
-- [Core API](https://docs.trivajs.com/core/api)
-- [Database Adapters](https://docs.trivajs.com/database/adapters)
-- [Production Deployment](https://docs.trivajs.com/deployment/production)
+- [Configuration](/core/configuration)
+- [Database Adapters](/database/adapters)
+- [Production](/deployment/production)

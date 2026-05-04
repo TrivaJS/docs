@@ -1,44 +1,36 @@
 # Support and Issues
 
-Use this page to choose the right channel when you need help with Triva.
+## Where to Report Problems
 
-## Open a GitHub Issue
+Use the main repository issue tracker for framework bugs, docs corrections, and feature requests:
 
-Open an issue when you find:
+- [GitHub Issues](https://github.com/trivajs/triva/issues)
 
-- a reproducible bug
-- a documentation gap
-- an API inconsistency
-- a feature request with a clear use case
+## What to Include
 
-Repository: [github.com/trivajs/triva/issues](https://github.com/trivajs/triva/issues)
-
-## Before You File
-
-Include the details that help maintainers act quickly:
+When filing an issue, include:
 
 - Triva version
 - Node.js version
-- operating system
-- adapter or extension involved
-- minimal reproduction steps
+- adapter choice if cache is involved
+- a short reproduction
 - expected behavior
 - actual behavior
+- stack traces or response payloads when available
 
-## Security Reports
+## Docs Problems
 
-Do not post security vulnerabilities in a public issue.
+If a page shows the wrong API shape, call out the exact route or file. The docs site is versioned, so it helps to include the URL you were viewing.
 
-- Security contact: `contact@trivajs.com`
-- Policy: [Security Policy](https://docs.trivajs.com/policies/security)
+## Before Opening an Issue
 
-## Documentation Fixes
+- Confirm you are using `new build(...)`, not `await build(...)`
+- Parse request bodies with `await req.json()` or `await req.text()`
+- Check whether your cache adapter needs an external driver package
+- Confirm HTTPS configs include both `ssl.key` and `ssl.cert`
 
-If the framework behavior is correct but the docs are unclear, open a docs-focused issue or send a pull request with the relevant page update.
+## Related Docs
 
-## Contributing
-
-Contribution guidance lives here:
-
-- [Contributing Guide](https://docs.trivajs.com/policies/contributing)
-- [Code of Conduct](https://docs.trivajs.com/policies/code-of-conduct)
+- [Getting Started](/getting-started)
+- [Configuration](/core/configuration)
+- [Docs Workspace](/README)

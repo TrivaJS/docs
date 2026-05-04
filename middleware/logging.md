@@ -1,69 +1,39 @@
 # Logging
 
-The current Triva constructor API does not expose a stable `logging` block. If you need request logs today, the recommended pattern is explicit middleware you own.
+Triva exposes request logs through the exported `log` utility. Log retention is configured on the app with the `retention` option.
 
-## Simple Request Logging
-
-```javascript
-import { build } from 'triva';
-
-const app = new build({ env: 'development' });
-
-app.use((req, res, next) => {
-  const startedAt = Date.now();
-
-  res.on('finish', () => {
-    const duration = Date.now() - startedAt;
-    console.log({
-      method: req.method,
-      url: req.url,
-      statusCode: res.statusCode,
-      duration
-    });
-  });
-
-  next();
-});
-```
-
-## Structured Logging
-
-```javascript
-app.use((req, res, next) => {
-  const startedAt = Date.now();
-
-  res.on('finish', () => {
-    process.stdout.write(JSON.stringify({
-      timestamp: new Date().toISOString(),
-      method: req.method,
-      url: req.url,
-      statusCode: res.statusCode,
-      duration: Date.now() - startedAt
-    }) + '\\n');
-  });
-
-  next();
-});
-```
-
-## Retention And Error Tracking
-
-If you also want in-process visibility for middleware and error data, combine explicit logging with `retention` and `errorTracking`:
+## Configure Retention
 
 ```javascript
 const app = new build({
   retention: {
-    enabled: true,
-    maxEntries: 100000
-  },
-  errorTracking: {
     enabled: true,
     maxEntries: 10000
   }
 });
 ```
 
-## Related Docs
+There is no separate `logging` constructor block in the current runtime API.
 
-- [Error Tracking](https://docs.trivajs.com/middleware/error-tracking)
-- [Custom Middleware](https://docs.trivajs.com/middleware/custom)
+## Read Logs
+
+```javascript
+import { log } from 'triva';
+
+const recent = await log.get({ limit: 50 });
+const errors = await log.get({ status: [500, 502, 503], limit: 25 });
+const stats = await log.getStats();
+```
+
+## Export Logs
+
+```javascript
+const exportResult = await log.export({ method: 'GET' }, 'request-logs.json');
+console.log(exportResult.filepath);
+```
+
+## Clear Logs
+
+```javascript
+await log.clear();
+```

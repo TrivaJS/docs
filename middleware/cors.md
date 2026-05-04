@@ -1,6 +1,6 @@
-# CORS Middleware
+# CORS
 
-Use `@trivajs/cors` when your Triva app needs Cross-Origin Resource Sharing headers.
+Triva ships CORS as an official extension package.
 
 ## Install
 
@@ -14,48 +14,29 @@ npm install @trivajs/cors
 import { build } from 'triva';
 import { cors } from '@trivajs/cors';
 
-const app = new build();
+const app = new build({ env: 'development' });
 
 app.use(cors());
 
 app.get('/api/data', (req, res) => {
   res.json({ ok: true });
 });
-
-app.listen(3000);
 ```
 
-## Restrict Origins
+## Restricted Origin
 
 ```javascript
 app.use(cors({
   origin: 'https://app.example.com',
   credentials: true,
-  allowedHeaders: ['Content-Type', 'Authorization'],
-  methods: ['GET', 'POST', 'PUT', 'DELETE']
+  allowedHeaders: ['Content-Type', 'Authorization']
 }));
 ```
 
-## Route-Specific Usage
+## Route-Level Usage
 
 ```javascript
-import { corsDevMode } from '@trivajs/cors';
-
-app.get('/api/public/data', corsDevMode(), (req, res) => {
+app.get('/api/public', cors(), (req, res) => {
   res.json({ public: true });
 });
 ```
-
-## JSON Body Example
-
-```javascript
-app.post('/api/items', cors({ origin: 'https://app.example.com' }), async (req, res) => {
-  const body = await req.json();
-  res.status(201).json({ created: body });
-});
-```
-
-## Related Docs
-
-- [Extension Overview](https://docs.trivajs.com/extensions/overview)
-- [Custom Middleware](https://docs.trivajs.com/middleware/custom)

@@ -1,53 +1,58 @@
 # Getting Started
 
-Triva is a class-based Node.js HTTP framework. The normal flow is:
+Triva is a class-based Node.js HTTP and HTTPS framework. You create an app with `new build(...)`, register routes on that instance, and start the server with `app.listen(...)`.
 
-1. create an app with `new build(options)`
-2. register routes on that app instance
-3. parse request bodies explicitly with `await req.json()` or `await req.text()`
-4. send a response with `res.json()`, `res.send()`, or the other response helpers
-5. start the server with `app.listen(port)`
-
-## Quick Install
+## Install
 
 ```bash
 npm install triva
 ```
 
-## Your First Server
+Triva targets modern Node.js. Use Node 18 or newer so the runtime and extension packages behave consistently.
+
+## Your First App
 
 ```javascript
 import { build } from 'triva';
 
 const app = new build({ env: 'development' });
 
-app.get('/', (req, res) => {
-  res.json({ message: 'Hello from Triva' });
+app.get('/api/users', (req, res) => {
+  res.json([
+    { id: 1, name: 'Ada' },
+    { id: 2, name: 'Grace' }
+  ]);
+});
+
+app.get('/api/users/:id', (req, res) => {
+  const users = [
+    { id: 1, name: 'Ada' },
+    { id: 2, name: 'Grace' }
+  ];
+
+  const user = users.find((entry) => entry.id === Number(req.params.id));
+  if (!user) {
+    return res.status(404).json({ error: 'User not found' });
+  }
+
+  res.json(user);
 });
 
 app.listen(3000);
 ```
 
-## Next Route To Add
+## What Triva Gives You
 
-```javascript
-app.post('/api/users', async (req, res) => {
-  const body = await req.json();
-  res.status(201).json({ created: body });
-});
-```
+- Route methods on the app instance: `app.get()`, `app.post()`, `app.put()`, `app.del()`, `app.patch()`, `app.all()`, and `app.route()`
+- Request parsing through `await req.json()` and `await req.text()`
+- Response helpers such as `res.status()`, `res.json()`, `res.send()`, `res.html()`, `res.redirect()`, and `res.sendFile()`
+- Configurable cache adapters through `cache` plus the exported `cache` singleton for runtime reads and writes
+- Built-in throttle, retention, and error-tracking support through constructor options
+- HTTP or HTTPS startup through `protocol` and `ssl`
 
-## What To Expect From The Core
+## Read Next
 
-- routing methods on the app instance
-- explicit request parsing instead of automatic `req.body`
-- cache adapters configured through `cache`
-- optional throttling and error tracking
-- HTTP or HTTPS startup from the same app class
-
-## Next Steps
-
-- [Installation Guide](https://docs.trivajs.com/installation)
-- [First Server Tutorial](https://docs.trivajs.com/quick-start/first-server)
-- [Core Concepts](https://docs.trivajs.com/core/concepts)
-- [API Reference](https://docs.trivajs.com/core/api)
+- [Installation](/installation)
+- [First Server](/quick-start/first-server)
+- [API Reference](/core/api)
+- [Configuration](/core/configuration)

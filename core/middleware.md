@@ -1,117 +1,47 @@
 # Middleware
 
-Middleware in Triva uses the familiar `(req, res, next)` shape and is registered with `app.use()` or directly on routes.
+Triva supports both constructor-driven built-in middleware and custom middleware registered with `app.use()`.
 
-## Basic Middleware
+## Custom Middleware
 
 ```javascript
-import { build } from 'triva';
-
-const app = new build({ env: 'development' });
-
-app.use((req, res, next) => {
-  console.log(`${req.method} ${req.url}`);
+const requestTimer = (req, res, next) => {
+  req.startedAt = Date.now();
   next();
-});
+};
 
-app.get('/', (req, res) => {
-  res.send('Hello');
-});
-
-app.listen(3000);
+app.use(requestTimer);
 ```
 
-## Route-Specific Middleware
+## Route-Level Middleware
 
 ```javascript
-const requireAuth = (req, res, next) => {
+const requireToken = (req, res, next) => {
   if (!req.headers.authorization) {
-    return res.status(401).json({ error: 'Unauthorized' });
+    return res.status(401).json({ error: 'Missing authorization header' });
   }
   next();
 };
 
-app.get('/admin', requireAuth, (req, res) => {
+app.get('/admin', requireToken, (req, res) => {
   res.json({ ok: true });
 });
 ```
 
-## Constructor-Wired Middleware
+## Built-In Middleware Configuration
 
-Triva can create middleware for throttling and retention from constructor options.
-
-```javascript
-const app = new build({
-  cache: { type: 'memory' },
-  throttle: {
-    limit: 100,
-    window_ms: 60000
-  },
-  retention: {
-    enabled: true,
-    maxEntries: 50000
-  }
-});
-```
-
-Because throttling stores counters through the cache layer, configure `cache` whenever you enable `throttle`.
-
-## `middleware` Helper Export
-
-If you want to create the middleware function yourself, use the exported factory:
-
-```javascript
-import { build, middleware } from 'triva';
-
-const app = new build({ cache: { type: 'memory' } });
-
-app.use(middleware({
-  throttle: {
-    limit: 200,
-    window_ms: 60000
-  },
-  retention: {
-    enabled: true,
-    maxEntries: 20000
-  }
-}));
-```
-
-## Cookie Parsing
-
-Cookie parsing is available through the exported `cookieParser()` utility.
-
-```javascript
-import { build, cookieParser } from 'triva';
-
-const app = new build({ env: 'development' });
-
-app.use(cookieParser());
-
-app.get('/session', (req, res) => {
-  res.json({ cookies: req.cookies || {} });
-});
-```
-
-## Error Tracking
-
-Error tracking is configured separately from middleware registration:
+Built-in middleware is configured on the app:
 
 ```javascript
 const app = new build({
-  errorTracking: {
-    enabled: true,
-    maxEntries: 10000
-  }
+  throttle: { limit: 100, window_ms: 60000 },
+  retention: { enabled: true, maxEntries: 10000 },
+  errorTracking: { enabled: true }
 });
 ```
-
-## Logging Note
-
-The stable way to add request logging today is explicit middleware you control. Do not document a `logging` constructor block for the current Triva API.
 
 ## Related Docs
 
-- [Middleware Overview](https://docs.trivajs.com/middleware/overview)
-- [Throttling](https://docs.trivajs.com/middleware/throttling)
-- [Error Tracking](https://docs.trivajs.com/middleware/error-tracking)
+- [Middleware Overview](/middleware/overview)
+- [Throttling](/middleware/throttling)
+- [Error Tracking](/middleware/error-tracking)

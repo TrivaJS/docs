@@ -1,35 +1,25 @@
 # Extensions Overview
 
-Triva keeps the core small and adds optional packages for focused workflows.
+Official Triva extensions add focused features without changing the core app model.
 
-## Official Extensions
+## Current Packages
 
-### `@trivajs/cors`
+- `@trivajs/cors`
+- `@triva/jwt`
+- `@trivajs/cli`
+- `@trivajs/shortcuts`
 
-Configurable Cross-Origin Resource Sharing middleware.
+## Core Principle
 
-### `@triva/jwt`
+Extensions should still feel like Triva:
 
-JWT signing, verification, route protection, and role checks.
-
-### `@trivajs/cli`
-
-Terminal tooling for cache, error, log, and server-related workflows.
-
-### `@trivajs/shortcuts`
-
-Editor snippets and shortcuts for Triva development.
-
-## Install Only What You Need
-
-```bash
-npm install triva
-npm install @trivajs/cors
-```
+- keep `new build(...)` as the application entry point
+- plug into `app.use()` or route handlers
+- avoid replacing the framework's request and response surface
 
 ## Related Docs
 
-- [CORS Extension](https://docs.trivajs.com/extensions/cors)
-- [JWT Extension](https://docs.trivajs.com/extensions/jwt)
-- [CLI Extension](https://docs.trivajs.com/extensions/cli)
-- [Shortcuts Extension](https://docs.trivajs.com/extensions/shortcuts)
+- [CORS](/extensions/cors)
+- [JWT](/extensions/jwt)
+- [CLI](/extensions/cli)
+- [Shortcuts](/extensions/shortcuts)

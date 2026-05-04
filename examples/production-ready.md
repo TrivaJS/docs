@@ -1,32 +1,22 @@
-# Production-Ready Example
-
-This example stays inside the constructor surface that the current Triva runtime actually uses.
-
-## Example
+# Production Ready
 
 ```javascript
-import { build } from 'triva';
-import { readFileSync } from 'fs';
+import { build, cache, cookieParser } from 'triva';
 
 const app = new build({
   env: 'production',
-  protocol: 'https',
-  ssl: {
-    key: readFileSync('./ssl/key.pem'),
-    cert: readFileSync('./ssl/cert.pem')
-  },
   cache: {
     type: 'redis',
     retention: 300000,
     database: {
-      url: process.env.REDIS_URL
+      host: process.env.REDIS_HOST || 'localhost',
+      port: Number(process.env.REDIS_PORT || '6379')
     }
   },
   throttle: {
     limit: 1000,
     window_ms: 60000,
-    burst_limit: 100,
-    ban_threshold: 10
+    burst_limit: 100
   },
   retention: {
     enabled: true,
@@ -34,26 +24,24 @@ const app = new build({
   },
   errorTracking: {
     enabled: true,
-    maxEntries: 10000
+    maxEntries: 50000
   }
 });
 
+app.use(cookieParser());
+
 app.get('/health', (req, res) => {
-  res.json({ status: 'ok' });
+  res.json({ ok: true, uptime: process.uptime() });
 });
 
-app.listen(443);
+app.get('/api/public/data', async (req, res) => {
+  const cached = await cache.get('public:data');
+  if (cached) {
+    return res.json({ source: 'cache', data: cached });
+  }
+
+  const data = { generatedAt: new Date().toISOString() };
+  await cache.set('public:data', data, 300000);
+  res.json({ source: 'generated', data });
+});
 ```
-
-## Why These Pieces Matter
-
-- HTTPS protects traffic in transit when Triva terminates TLS directly
-- shared cache adapters support multi-instance deployments
-- throttling protects public endpoints and depends on the cache layer
-- retention and error tracking help with runtime visibility
-
-## Related Docs
-
-- [Production Deployment](https://docs.trivajs.com/deployment/production)
-- [HTTPS Deployment](https://docs.trivajs.com/deployment/https)
-- [Database Adapters](https://docs.trivajs.com/database/adapters)
