@@ -710,10 +710,10 @@ main hr {
 
 .doc-home-landing h1 {
   margin: 0;
-  max-width: 11ch;
-  font-size: clamp(3.1rem, 6vw, 5.1rem);
-  line-height: 0.94;
-  letter-spacing: -0.065em;
+  max-width: 14ch;
+  font-size: clamp(2rem, 3.2vw, 3.2rem);
+  line-height: 1.1;
+  letter-spacing: -0.02em;
   color: #fafafa;
 }
 
@@ -1035,7 +1035,7 @@ main hr {
 
   .doc-home-landing h1 {
     max-width: none;
-    font-size: clamp(2.5rem, 12vw, 3.5rem);
+    font-size: clamp(1.75rem, 9vw, 2.8rem);
   }
 
   .doc-home-lead {
@@ -1155,12 +1155,12 @@ main hr {
 .doc-home-landing h1 {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 4px;
   margin: 20px 0 0;
   max-width: none;
-  font-size: clamp(3rem, 5vw, 4.75rem);
-  line-height: 0.94;
-  letter-spacing: -0.04em;
+  font-size: clamp(2rem, 3.2vw, 3.2rem);
+  line-height: 1.1;
+  letter-spacing: -0.02em;
   color: #fafafa;
   animation: doc-home-rise 0.75s 0.08s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
@@ -1636,7 +1636,7 @@ main hr {
   }
 
   .doc-home-landing h1 {
-    font-size: clamp(2.6rem, 8vw, 4rem);
+    font-size: clamp(1.75rem, 6vw, 2.8rem);
   }
 
   .doc-home-final {
@@ -1688,7 +1688,7 @@ main hr {
   }
 
   .doc-home-landing h1 {
-    font-size: clamp(2.8rem, 15vw, 4rem);
+    font-size: clamp(1.6rem, 10vw, 2.4rem);
   }
 
   .doc-home-lead {
