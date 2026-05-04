@@ -687,54 +687,42 @@ function renderHomePage() {
 
   return `
     <div class="doc-home doc-home-landing">
-      <section class="doc-home-poster">
-        <div class="doc-home-poster-grid">
-          <div class="doc-home-copy">
-            <div class="doc-home-poster-label">
-              <span class="doc-home-brand-tag">Triva</span>
-              <span class="doc-home-context">Documentation</span>
-              <span class="doc-home-context">${escapeHtml(getVersionLabel(CURRENT_VERSION))}</span>
-              <span class="doc-home-context">${escapeHtml(getVersionStatusLabel(CURRENT_VERSION))}</span>
-            </div>
-            <h1>
-              <span>Triva Docs</span>
-              <em>Ship the server.</em>
-            </h1>
-            <p class="doc-home-lead">Reference, guides, adapters, and production patterns for the class-based Node.js framework built around <code>new build(...)</code>.</p>
-            <div class="doc-home-actions">
-              <a class="doc-home-action-primary" href="${getVersionStartHref(CURRENT_VERSION)}">Get started</a>
-              <a class="doc-home-action-secondary" href="${buildVersionedPath('/core/api', CURRENT_VERSION)}">API reference</a>
-              <a class="doc-home-action-secondary" href="${buildVersionedPath('/examples/rest-api', CURRENT_VERSION)}">Working examples</a>
-            </div>
-            <div class="doc-home-install-band">
-              <span class="doc-home-install-label">Install</span>
-              <code>npm install triva</code>
-              <span class="doc-home-install-meta">Node 18+</span>
-            </div>
-            <div class="doc-home-proof">
-              <span>Routing</span>
-              <span>Middleware</span>
-              <span>Cache adapters</span>
-              <span>HTTPS</span>
-            </div>
+      <div class="doc-home-hero">
+        <div class="doc-home-copy">
+          <div class="doc-home-eyebrow">
+            <span class="doc-home-brand-tag">Triva</span>
+            <span class="doc-home-context">Documentation</span>
+            <span class="doc-home-context">${escapeHtml(getVersionLabel(CURRENT_VERSION))}</span>
+            <span class="doc-home-context">${escapeHtml(getVersionStatusLabel(CURRENT_VERSION))}</span>
           </div>
-
-          <figure class="doc-home-stage" aria-label="Triva example">
-            <div class="doc-home-stage-note">
-              <span>Current runtime shape</span>
-              <p>Landing-page examples stay aligned with the actual Triva API instead of drifting into docs-only abstractions.</p>
+          <h1>
+            <span>Triva Docs</span>
+            <em>Ship the server.</em>
+          </h1>
+          <p class="doc-home-lead">Reference, guides, adapters, and production patterns for the class-based Node.js framework built around <code>new build(...)</code>.</p>
+          <div class="doc-home-actions">
+            <a class="doc-home-action-primary" href="${getVersionStartHref(CURRENT_VERSION)}">Get started</a>
+            <a class="doc-home-action-secondary" href="${buildVersionedPath('/core/api', CURRENT_VERSION)}">API reference</a>
+            <a class="doc-home-action-secondary" href="${buildVersionedPath('/examples/rest-api', CURRENT_VERSION)}">Working examples</a>
+          </div>
+          <div class="doc-home-install-band">
+            <span class="doc-home-install-label">Install</span>
+            <code>npm install triva</code>
+            <span class="doc-home-install-meta">Node 18+</span>
+          </div>
+          <div class="doc-home-proof">
+            <span>Routing</span>
+            <span>Middleware</span>
+            <span>Cache adapters</span>
+            <span>HTTPS</span>
+          </div>
+        </div>
+        <div class="doc-home-code-panel">
+          <div class="doc-home-code-window">
+            <div class="doc-home-code-chrome">
+              <span></span><span></span><span></span>
             </div>
-            <div class="doc-home-stage-halo" aria-hidden="true"></div>
-            <div class="doc-home-code-shell">
-              <div class="doc-home-code-top" aria-hidden="true">
-                <div class="doc-home-code-dots">
-                  <span></span>
-                  <span></span>
-                  <span></span>
-                </div>
-                <div class="doc-home-code-file">app.js</div>
-              </div>
-              <pre class="doc-home-code"><code><span class="token-keyword">import</span> { build } <span class="token-keyword">from</span> <span class="token-string">'triva'</span>;
+            <pre class="doc-home-code"><code><span class="token-keyword">import</span> { build } <span class="token-keyword">from</span> <span class="token-string">'triva'</span>;
 
 <span class="token-keyword">const</span> app = <span class="token-keyword">new</span> build({ env: <span class="token-string">'development'</span> });
 <span class="token-keyword">const</span> users = [{ id: <span class="token-number">1</span>, name: <span class="token-string">'Ada'</span> }];
@@ -750,10 +738,9 @@ app.get(<span class="token-string">'/api/users/:id'</span>, (req, res) => {
 });
 
 app.listen(<span class="token-number">3000</span>);</code></pre>
-            </div>
-          </figure>
+          </div>
         </div>
-      </section>
+      </div>
 
       <section class="doc-home-flow">
         <div class="doc-home-section-head">
